@@ -16,7 +16,8 @@ const int LED_PIN = 13;
 unsigned long lastMessage = 0;
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(115200);
+  Serial1.begin(115200);
   // Setup motor pins
   pinMode(SERVO_L, OUTPUT);
   pinMode(SERVO_R, OUTPUT);
@@ -34,10 +35,41 @@ void loop() {
   digitalWrite(LED_PIN, LOW);
 
   // Initialize data
-  uint8_t buf[VW_MAX_MESSAGE_LEN];
-  uint8_t buflen = VW_MAX_MESSAGE_LEN;
   char dir = '-';
   byte power = 0;
+
+  // Read incoming messages
+  if(listenRF(dir, power))
+  {
+    // Give Feedback
+    digitalWrite(LED_PIN, HIGH);
+    
+    if (Serial) {
+      Serial.print("Direction: ");
+      Serial.print(dir);
+      Serial.print(" - Power: ");
+      Serial.print(power);
+      Serial.println("");
+    }
+    
+    if (Serial1) {
+      Serial1.print("Direction: ");
+      Serial1.print(dir);
+      Serial1.print(" - Power: ");
+      Serial1.print(power);
+      Serial1.println("");
+    }
+    
+  }
+
+  move(dir, power);
+}
+
+bool listenRF(char &dir, byte &power) {
+  
+  // Initialize data
+  uint8_t buf[VW_MAX_MESSAGE_LEN];
+  uint8_t buflen = VW_MAX_MESSAGE_LEN;
 
   // Read incoming messages
   if(vw_get_message(buf, &buflen))
@@ -49,17 +81,12 @@ void loop() {
       if (i == 0) dir = char(buf[i]);
       if (i == 1) power = map(byte(buf[i]), 48, 57, 0, 10);
     }
-    // Give Feedback
-    digitalWrite(LED_PIN, HIGH);
-    if (Serial) {
-      Serial.print("Direction: ");
-      Serial.print(dir);
-      Serial.print(" - Power: ");
-      Serial.print(power);
-      Serial.println("");
-    }
+    return true;
   }
+  return false;
+}
 
+void move(char dir, byte power) {
   switch(dir) {
     case 'F':
         analogWrite(SERVO_L, 10);
@@ -88,6 +115,6 @@ void loop() {
         analogWrite(SERVO_R, 0);
         //}
       break;
-  }
+  }  
 }
 
