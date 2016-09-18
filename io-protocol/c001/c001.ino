@@ -15,11 +15,12 @@
 
 FILE serial_stdout;
 String command;
+struct Tone { long due; short pitch; short duration; };
+Queue<Tone> tones = Queue<Tone>(32);
+long due = millis(); 
+
 int LED = 4;
 int BUZ = 9;
-
-struct Cmd { char type; int due; byte data1; byte data2; byte data3; };
-Queue<Cmd> queue = Queue<Cmd>(4);
 
 void setup() {
   Serial.begin(115200);
@@ -31,7 +32,7 @@ void setup() {
 void loop() {
   query();
   act();
-  delays();
+  delayact();
   sense();
   delay(100);
 }
@@ -56,7 +57,7 @@ void act() {
   Serial.print(command);
   randomSeed(micros());
   short pos; byte batch; 
-  long due = millis(); // When is the command due? used to process batches.
+  if (due < millis()) due = millis(); // When is the command due? used to process batches.
   switch(command[0]) {
     case 'H': // Help
       if (command_length < 3) {
@@ -85,9 +86,9 @@ void act() {
       if (command_length < 4) return;
       for (pos = 2; pos < command_length; pos = pos + 3) {
         if (command_length < pos + 2) return;
-        Cmd cmd = { 'B', due, command[pos], command[pos+1], 0 };
-        queue.push(cmd);
-        due = due + (command[pos+1] * 16);
+        Tone segment = { due, command[pos] * 16, command[pos+1] * 16};
+        tones.push(segment);
+        due = due + segment.duration;
       }
       Serial.println(":OK");
       return;
@@ -102,20 +103,16 @@ void act() {
   }
 }
 
-void delays() {
-  if (queue.count()) {
-    Cmd cmd = queue.pop(true);
-    if (cmd.due < millis()) { // Is it due?
-      cmd = queue.pop();
-      printf("Acting on delay, %d items left", queue.count());
+void delayact() {
+  if (tones.count()) {
+    Tone delayedtone = tones.pop(true);
+    if (delayedtone.due < millis()) { // Is it due?
+      delayedtone = tones.pop();
+      printf("Acting on delay, %d items left", tones.count());
       Serial.println();
-      switch(cmd.type) {
-        case 'B':
-          tone(BUZ, cmd.data1 * 16, cmd.data2 * 16);
-          return;
-      }
+      tone(BUZ, delayedtone.pitch, delayedtone.duration);
     }
-  }  
+  }
 }
 
 void sense() {
