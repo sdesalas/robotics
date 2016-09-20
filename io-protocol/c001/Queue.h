@@ -2,7 +2,7 @@
  * Queue.h
  * 
  * Defines a templated (generic) class for a queue of things.
- * Handy for arduino projects, just #include "Queue.h"; and this file.
+ * Used for Arduino projects, just #include "Queue.h" and add this file via the IDE.
  * 
  * Examples:
  * 
@@ -57,6 +57,7 @@ class Queue {
     inline int back();
     void push(const T &item);
     T pop(bool keep);
+    void clear();
 };
 
 template<class T>
@@ -103,6 +104,13 @@ T Queue<T>::pop(bool keep = false) {
       _front -= (_maxitems + 1);
     return result; 
   }
+}
+
+template<class T>
+void Queue<T>::clear() 
+{
+  _front = _back;
+  _count = 0;
 }
 
 #endif
