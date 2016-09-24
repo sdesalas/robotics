@@ -1,17 +1,18 @@
 /* 
- *  CONTROLLER 001 
+ *  CONTROLLER 002 
  *  
  *  By Steven de Salas
  *  
- *  Example of alternative to firmata for allowing upstream
- *  serial control over arduino microcontroller.
- * 
+ *  Example of radio control positive/negative feedback 
+ *  on auto-discovery microcontroller.
+ *  
  *  Uses a protocol to allow USB querying of available 
  *  output (actuator) commands, and examples of the same,
  *  so the upstream microprocessor can act upon them.
  *  
  */
 #include "Queue.h";
+#include "VirtualWire.h"
 
 FILE serial_stdout;
 String command;
@@ -23,7 +24,8 @@ Queue<Flash> greens = Queue<Flash>(32);
 int currentPitch;
 
 // Inputs
-int LIGHT = 5;
+int LIGHT = A5;
+int RF_RX = 2;
 
 // Outputs
 int LED_G = 7;
@@ -38,6 +40,11 @@ void setup() {
   // Set up stdout
   fdev_setup_stream(&serial_stdout, serial_putchar, NULL, _FDEV_SETUP_WRITE);
   stdout = &serial_stdout;
+  // Set up radio receiver
+  vw_set_rx_pin(RF_RX); 
+  vw_setup(2000); // Transmission speed in bits per second.
+  vw_rx_start(); // Start the PLL receiver.
+  delay(1);
 }
 
 void loop() {
@@ -206,6 +213,27 @@ void sense() {
   Serial.println(digitalRead(LED_R));
   Serial.print("b-");
   Serial.println(currentPitch);
+  Serial.print("r-");
+  Serial.println(getRFMessage());
+}
+
+String getRFMessage() {
+
+  // Initialize data
+  uint8_t buf[VW_MAX_MESSAGE_LEN];
+  uint8_t buflen = VW_MAX_MESSAGE_LEN;
+  String output = "";
+
+  // Read incoming messages
+  if(vw_get_message(buf, &buflen))
+  {
+    // Message with a good checksum received, dump HEX
+    for(int i = 0; i < buflen; ++i)
+    {
+      output.concat(char(buf[i]));
+    }
+  }
+  return output;
 }
 
 // Function that printf and related will use to print
