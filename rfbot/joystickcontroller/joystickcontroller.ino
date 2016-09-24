@@ -9,22 +9,29 @@
 #include <VirtualWire.h>
  
 const int RF_TX_PIN = 15;
-const int RF_PTT_PIN = 9;
+const int RF_PTT_PIN = 16;
+const int LED = A1;
 const int X_PIN = A0;
 const int Y_PIN = A2;
 const int SW_PIN = 10;
-const int RED_LED = A1;
+const int RED_PIN = 4;
+const int GREEN_PIN = 9;
 enum Direction { STILL, FORWARD, BACK, LEFT, RIGHT };
+String msg;
  
 void setup()
 {
   Serial.begin(9600);
-  // Setup Joystick and RF pins
+  // Setup Joystick / Button pins
   pinMode(X_PIN, INPUT);
   pinMode(Y_PIN, INPUT);
+  pinMode(SW_PIN, INPUT);
+  pinMode(RED_PIN, INPUT);
+  pinMode(GREEN_PIN, INPUT);
+  // Setup RF
   vw_set_tx_pin(RF_TX_PIN);
   vw_set_ptt_pin(RF_PTT_PIN);
-  vw_setup(2000); // Transmission speed in bits per second.
+  vw_setup(2000); // Transmission speed bits/sec
 }
 
 void loop()
@@ -34,6 +41,8 @@ void loop()
   int y = analogRead(Y_PIN);
   char dir = '-';
   int power = 0;
+  msg = "";
+  
   // Determine direction and power
   if (y >= 300 && y <= 700) {
     if (x >= 300 && x <= 700) {
@@ -55,24 +64,40 @@ void loop()
 
   // Constrain just in case
   power = constrain(power, 0, 255);
-  
-  // Show lights for what we are doing
-  analogWrite(RED_LED, digitalRead(SW_PIN) == HIGH ? 255 : power);
 
-  // Send Button press
-  if (digitalRead(SW_PIN) == HIGH) {
-    Serial.println("Switch: ON");
-    vw_send((uint8_t *)"XX", 2);
-  }
+
   // Send direction and power (2 x 8bit values) 
-  else if (dir != '-') {
+  if (dir != '-') {
     Serial.write("Direction: ");
     Serial.print(dir);
     Serial.write(" - Power:");
     Serial.print(power);
     Serial.write("\n");
-    byte msg[] = {byte(dir), byte(map(power, 0, 255, 48, 57))}; 
-    vw_send((uint8_t *)msg, 2); 
+    msg = dir;
+    msg += char(map(power, 0, 255, 48, 57));
+  }
+  // Send Button press
+  if (digitalRead(SW_PIN) == HIGH) {
+    Serial.println("Switch: ON");
+    msg = "XX";
+  }
+  if (digitalRead(RED_PIN) == HIGH) {
+    Serial.println("Switch: RED");
+    msg = "RR";
+  }
+  if (digitalRead(GREEN_PIN) == HIGH) {
+    Serial.println("Switch: GREEN");
+    msg = "GG";
+  }
+
+  // Any output? 
+  if (msg.length() == 0) {
+    digitalWrite(LED, LOW);
+  } else {
+    // Show lights and send
+    analogWrite(LED, power > 0 ? power : 255);
+    Serial.println(msg);
+    vw_send((uint8_t*)msg.c_str(), msg.length()); 
   }
   
   // Wait 0.1 seconds
