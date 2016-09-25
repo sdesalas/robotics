@@ -10,7 +10,7 @@
  
 const int RF_TX_PIN = 15;
 const int RF_PTT_PIN = 16;
-const int LED = A1;
+const int RF_TX_LED = 17;
 const int X_PIN = A0;
 const int Y_PIN = A2;
 const int SW_PIN = 10;
@@ -21,7 +21,7 @@ String msg;
  
 void setup()
 {
-  Serial.begin(9600);
+  Serial.begin(115200);
   // Setup Joystick / Button pins
   pinMode(X_PIN, INPUT);
   pinMode(Y_PIN, INPUT);
@@ -29,6 +29,7 @@ void setup()
   pinMode(RED_PIN, INPUT);
   pinMode(GREEN_PIN, INPUT);
   // Setup RF
+  pinMode(RF_TX_LED, OUTPUT);
   vw_set_tx_pin(RF_TX_PIN);
   vw_set_ptt_pin(RF_PTT_PIN);
   vw_setup(2000); // Transmission speed bits/sec
@@ -65,7 +66,6 @@ void loop()
   // Constrain just in case
   power = constrain(power, 0, 255);
 
-
   // Send direction and power (2 x 8bit values) 
   if (dir != '-') {
     Serial.write("Direction: ");
@@ -79,23 +79,23 @@ void loop()
   // Send Button press
   if (digitalRead(SW_PIN) == HIGH) {
     Serial.println("Switch: ON");
-    msg = "XX";
+    msg = "!X";
   }
   if (digitalRead(RED_PIN) == HIGH) {
     Serial.println("Switch: RED");
-    msg = "RR";
+    msg = "!-";
   }
   if (digitalRead(GREEN_PIN) == HIGH) {
     Serial.println("Switch: GREEN");
-    msg = "GG";
+    msg = "!+";
   }
 
   // Any output? 
   if (msg.length() == 0) {
-    digitalWrite(LED, LOW);
+    digitalWrite(RF_TX_LED, HIGH);
   } else {
     // Show lights and send
-    analogWrite(LED, power > 0 ? power : 255);
+    digitalWrite(RF_TX_LED, LOW);
     Serial.println(msg);
     vw_send((uint8_t*)msg.c_str(), msg.length()); 
   }
