@@ -26,6 +26,7 @@ int currentPitch;
 // Inputs
 int LIGHT = A5;
 int RF_RX = 2;
+int RF_LED = 3;
 
 // Outputs
 int LED_G = 7;
@@ -33,6 +34,7 @@ int LED_R = 4;
 int BUZ = 9;
 
 void setup() {
+  pinMode(RF_LED, OUTPUT);
   pinMode(LED_G, OUTPUT);
   pinMode(LED_R, OUTPUT);
   pinMode(BUZ, OUTPUT);
@@ -52,7 +54,7 @@ void loop() {
   interpret();
   act();
   sense();
-  delay(100);
+  delay(1000);
 }
 
 // Reads 1 line from USB Serial
@@ -74,12 +76,12 @@ void interpret() {
   if (command_length < 1) return;
   Serial.print(command);
   randomSeed(micros());
-  short pos; byte batch; 
+  short pos; byte batch; byte value; byte duration;
   long due; // When is the command due? used to process batches.
   Flash switch_off; Tone go_quiet;
   switch(command[0]) {
 
-    case 'H':
+    case '?':
       // 
       // Help - List Available commands
       //
@@ -128,14 +130,17 @@ void interpret() {
       //
       // B:u4|;0 // ie. B:[byte `tone`][byte `duration`]|[byte `tone`][byte `duration`]|...
       //
-      if (command_length < 4) return;
+      if (command_length < 3) return;
       tones.clear();
       due = millis();
-      for (pos = 2; pos < command_length; pos = pos + 3) {
-        if (command_length < pos + 2) return;
-        Tone segment = { due, command[pos] * 16, command[pos+1] * 16};
+      pos = 2;
+      while(pos < command_length) {
+        value = command[pos++];
+        duration = (command_length == pos) ? 255 : command[pos]; // Max if undefined
+        Tone segment = { due, value * 16, duration * 16};
         tones.push(segment);
         due = due + segment.duration;
+        pos++; // separator (|)
       }
       go_quiet = { due, 0, 1 };
       tones.push(go_quiet);
@@ -151,14 +156,17 @@ void interpret() {
       //
       // R:1y|0G|1n // ie. R:[0/1][byte duration]|[0/1][byte duration]|...
       //
-      if (command_length < 4) return;
-      due = millis();
+      if (command_length < 3) return;
       ((command[0] == 'G') ? greens : reds).clear();
-      for (pos = 2; pos < command_length; pos = pos + 3) {
-        if (command_length < pos + 2) return;
-        Flash flash = { due, command[pos] != 48, command[pos+1] * 16};
+      due = millis();
+      pos = 2;
+      while(pos < command_length) {
+        value = command[pos++] != 48;
+        duration = (command_length == pos) ? 255 : command[pos]; // Max if undefined
+        Flash flash = { due, value, duration * 16};
         ((command[0] == 'G') ? greens : reds).push(flash);
         due = due + flash.duration;
+        pos++; // separator (|)
       }
       switch_off = { due, 0, 0 };
       ((command[0] == 'G') ? greens : reds).push(switch_off); // Turn off when finished
@@ -233,6 +241,13 @@ String getRFMessage() {
       output.concat(char(buf[i]));
     }
   }
+
+  if (output.length() > 0) {
+    digitalWrite(RF_LED, HIGH);
+  } else {
+    digitalWrite(RF_LED, LOW);
+  }
+  
   return output;
 }
 

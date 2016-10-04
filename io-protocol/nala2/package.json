@@ -1,0 +1,22 @@
+{
+  "name": "nala2",
+  "version": "1.0.0",
+  "description": "Non-deterministic Artifcial Learning Algorithm",
+  "main": "index.js",
+  "dependencies": {
+    "commander": "^2.9.0",
+    "fs-extra": "^0.30.0",
+    "serialport": "^4.0.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "test"
+  },
+  "keywords": [
+    "serial",
+    "arduino",
+    "learning"
+  ],
+  "author": "Steven de Salas",
+  "license": "MIT"
+}
