@@ -7,11 +7,11 @@ class Pattern extends Array {
 		this.options = options = options || {};
 		// Complete history up to a certain length
 		this.buffer = [];
-		this.options.maxLength = options.maxLength || 512;
+		this.options.bufferLength = options.bufferLength || 512;
 		// Level 1 = basic cycle, single loop of all sensor input
 		this.sensorCycle = [];
-		// Level 2 = medium rhythms, repetition within 64 bytes
-		//this.level2 = [];
+		this.sensorHistory = {};
+		this.options.historyLength = options.historyLength || 3;
 		// Initialize
 		if (options.data) {
 				options.data.forEach(this.update.bind(this));
@@ -19,16 +19,66 @@ class Pattern extends Array {
 	}
 
 	update(data) {
-		var expected = 1;
+		var deviation = 1, surprise = 0;
+		var bufferLength = this.buffer.length;
+		var cycleLength = this.sensorCycle.length;
+		var cyclePos = bufferLength % cycleLength;
+		var patternExists = cycleLength < bufferLength;
+		var history = this.sensorHistory[cyclePos] = this.sensorHistory[cyclePos] || [];
+		var expected = patternExists ? this.sensorCycle[0] : undefined;
 		var index = this.sensorCycle.indexOf(data);
 		if (index > -1) {
-			this.sensorCycle.splice(0, index + 1);
-			expected = 0;
+			// Exact match ...
+			history.unshift(this.sensorCycle.splice(0, index + 1).pop());
+			history.splice(this.options.historyLength);
+			deviation = 0;
+		} else {
+			// No match? Is there a pattern yet?
+			if (patternExists) {
+				deviation = this.compare(data, expected, history);
+				surprise = (deviation > 0.2) ? 1 : 0;
+				if (deviation < 0.5) {
+					// Looks like a match ...
+					history.unshift(this.sensorCycle.shift());
+					history.splice(this.options.historyLength);
+				}
+			}
 		}
 		this.sensorCycle.push(data);
 		this.buffer.push(data);
-		this.buffer.splice(this.options.maxLength);
-		return expected;
+		if (this.buffer.length > this.options.bufferLength) {
+			this.buffer.splice(this.options.bufferLength * 0.8);
+		}
+		this.lastUpdate = {
+			data: data,
+			expected: expected,
+			deviation: deviation,
+			surprise: surprise
+		};
+		return this;
+	}
+
+	// Compare two strings and returns a deviation between 0 and 1
+	// 'abcd' vs 'abcd' = 1;
+	// 'abcd' vs 'abdd' = 0.75;
+	// 'abcd' vs 'abdc' = 0.5;
+	// 'abdc' vs 'bdca' = 0;
+	compare(actual, expected, history) {
+		if (!actual || !expected) return 1;
+		if (actual === expected) return 0;
+		var history = (history || []).slice(),
+				deviation = 0,
+				lenMax = actual.length;
+		history.push(expected);
+		history.forEach(pastValue => { if (pastValue.length > lenMax) lenMax = pastValue.length; });
+		var step = 1/(lenMax*history.length);
+		history.forEach(pastValue => {
+			for (var i = 0; i < lenMax; i++) {
+				if (pastValue.charCodeAt(i) !== actual.charCodeAt(i))
+					deviation += step;
+			}
+		});
+		return deviation;
 	}
 
 	hash(str) {
@@ -41,63 +91,11 @@ class Pattern extends Array {
     }
     return hash;
 	}
-/*
-	// Updates pattern and returns
-	// difference and confidence
-	// where both values are between 0 and 1.
-	update(data) { // string
-		var difference = 1;
-		var confidence = 0;
-		var byte, diffByte, arr = [];
-		var pt, diffPt, vector = [];
-		var offset = this.buffer.slice(-1);
-		var len = data.length;
-		// Compare with existing
-		for (var i = 0; i < len; i++) {
-				byte = data.charCodeAt(i);
-				pt = byte - offset;
-				diffByte = (byte - this.level1_bytes[i]) / byte || 1;
-				diffPt = (pt - this.level1_vector[i]) / pt || 1;
-				difference -= ((0.5 * diffByte) + (0.5 * diffPt)) / len;
-				confidence += ((0.5 * diffByte) + (0.5 * diffPt)) / len;
-				vector.push(pt);
-				arr.push(byte);
-				offset = byte;
-		}
-		// Add data
-		Array.prototype.push.apply(this.buffer, arr);
-		Array.prototype.push.apply(this.level1_bytes, arr);
-		Array.prototype.push.apply(this.level1_vector, vector);
-		var result = {
-			difference: difference < 0 ? 0 : difference,
-			confidence: confidence > 1 ? 1 : confidence
-		}
-		this.trim(result);
-		return result;
-	}
 
-	// Look for patterns and trim accordingly
-	trim(result) {
-		this.buffer.splice(this.maxLength);
-		if(result.difference < 0.5) {
-
-		}
-	}
-*/
 	clear() {
-		this.offset = 0;
+		this.buffer = [];
 		this.sensorCycle = [];
-		//this.level2 = [];
-	}
-
-	// Compares two patterns and returns the difference
-	compare(pattern) {
-		var difference = 1;
-		var confidence = 0;
-		return {
-			difference: difference,
-			confidence: confidence
-		}
+		delete this.lastUpdate;
 	}
 
 }

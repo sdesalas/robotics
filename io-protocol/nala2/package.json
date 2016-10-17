@@ -8,9 +8,11 @@
     "fs-extra": "^0.30.0",
     "serialport": "^4.0.1"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "mocha": "^3.1.2"
+  },
   "scripts": {
-    "test": "test"
+    "test": "node ./node_modules/mocha/bin/mocha"
   },
   "keywords": [
     "serial",
