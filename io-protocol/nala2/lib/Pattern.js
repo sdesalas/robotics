@@ -59,10 +59,10 @@ class Pattern extends Array {
 	}
 
 	// Compare two strings and returns a deviation between 0 and 1
-	// 'abcd' vs 'abcd' = 1;
-	// 'abcd' vs 'abdd' = 0.75;
+	// 'abcd' vs 'abcd' = 0;
+	// 'abcd' vs 'abdd' = 0.25;
 	// 'abcd' vs 'abdc' = 0.5;
-	// 'abdc' vs 'bdca' = 0;
+	// 'abdc' vs 'bdca' = 1;
 	compare(actual, expected, history) {
 		if (!actual || !expected) return 1;
 		if (actual === expected) return 0;
