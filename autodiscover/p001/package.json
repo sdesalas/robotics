@@ -12,6 +12,7 @@
     "mocha": "^3.1.2"
   },
   "scripts": {
+    "start": "node ./bin/nala > nala.log",
     "test": "node ./node_modules/mocha/bin/mocha"
   },
   "keywords": [
