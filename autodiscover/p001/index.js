@@ -17,7 +17,7 @@ class Nala extends Observable {
 		options = options || {};
 		options.baudRate = options.baudRate || 115200;
 		options.memSize = options.memSize || 512;
-		options.manufacturers = options.manufacturers || /(wch)|(arduino)/i;
+		options.manufacturers = options.manufacturers || /(wch)|(arduino)|(1a86)/i;
 		// Attach event listeners
 		if (options.listeners) {
 			for(var eventName in options.listeners) {
