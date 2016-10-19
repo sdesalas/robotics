@@ -28,7 +28,7 @@ class Nala extends Observable {
 		Nala.debugMode = options.debug;
 		this.devices = {};
 		this.memory = [];
-		this.backgroundNoise = new Pattern({ length: 512 });
+		this.noise = new Pattern({ length: 512 });
 		this.options = options;
 	}
 
@@ -70,12 +70,12 @@ class Nala extends Observable {
 		console.debug('Nala.prototype.connect()', port);
 		if (!port) return;
 		// Add to list of known devices
-		var device = new Device(port);
+		var device = new Device(port, Object.keys(this.devices).length);
 		this.devices[device.id] = device;
 		fs.writeFileSync(device.dataPath + '/device.json', JSON.stringify(device, null, 2));
 		device.on('connected', this.emit.bind(this, 'deviceready', device.id, device.dataPath));
 		device.on('disconnect', this.remove.bind(this, device.id));
-		device.on('data', this.data);
+		device.on('data', this.data.bind(this));
 	}
 
 	// Controller device no longer needed
@@ -111,19 +111,14 @@ class Nala extends Observable {
 	// This gets called pretty frequently so should be optimised!
 	data(data) {
 		console.debug('Nala.prototype.data()', data);
-		// Background noise
-		var change = this.backgroundNoise.update(data);
-		if (change.difference > 0.15 && change.confidence > 0.5) {
-			this.interpret(change);
-		}
-		// Memory
-		this.memory.push(data);
-		while(this.memory.length > this.options.memSize) {
-			this.memory.shift();
+		var pattern = this.noise.update(data);
+		if (pattern.lastUpdate.surprise) {
+			this.interpret(pattern);
 		}
 	}
 
-	interpret(change) {
+	interpret(pattern) {
+		console.debug('Nala.prototype.interpret()', pattern.lastUpdate);
 		// Shit. Change in input pattern.
 		// Was change in pattern due to own action?
 		// If due to own action, is it as expected?

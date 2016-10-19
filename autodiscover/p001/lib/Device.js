@@ -13,10 +13,11 @@ const Nala = require('../');
 class Device extends Observable {
 
 	// Initializes an attached microcontroller
-	constructor(port) {
+	constructor(port, index) {
 		super();
 		console.debug('new Device(port)', port.id);
 		this.id = md5.update(port.pnp).digest('hex').substr(0, 8);
+		this.key = String.fromCharCode(index + 48);
 		this.port = port;
 		this.dataPath = './data/' + this.id;
 		this.inputPath = this.dataPath + '/in';
@@ -34,8 +35,7 @@ class Device extends Observable {
 		console.debug('Device.prototype.connect()');
 		var device = this;
 		var connection = new SerialPort(this.port.id, { parser: readline, baudRate: this.port.baudRate });
-		//var readline = connection.pipe(new ReadLine());
-		connection.on('data', this.emit.bind(this, 'data'));
+		connection.on('data', data => this.emit('data', this.key + data));
 		connection.on('open', function(error) {
 			if (error) {
 				var msg = util.format('Failed to open connection to %s. %s', device.id, error);
