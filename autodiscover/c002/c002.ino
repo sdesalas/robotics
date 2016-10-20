@@ -54,7 +54,7 @@ void loop() {
   interpret();
   act();
   sense();
-  delay(1000);
+  delay(500);
 }
 
 // Reads 1 line from USB Serial
