@@ -162,14 +162,14 @@ describe('lib/Pattern.js', function() {
     describe('Performance', () => {
       var cycle = [ 'C:0', 'D:0', 'X:1', 'a:0', 'b:0', 'L:121', 'R:0', 'G:0'],
           pattern,
-          limitMB = 25,
+          limitMB = 30,
           startRAM = os.freemem() / os.totalmem();
 
       beforeEach(() => {
         pattern = new Pattern();
       });
 
-      function executeUpdates(pattern, cycle, runs, limitMB, showlog) {
+      function executeUpdates(pattern, cycle, runs, showlog) {
         if (showlog) console.log('executeUpdates() x %d', runs);
         for(var i = 0; i < runs; i++) {
           cycle.forEach(item => {
@@ -180,26 +180,31 @@ describe('lib/Pattern.js', function() {
             console.log("free:%s%, rss:%d", (os.freemem() / os.totalmem() * 100).toFixed(2), process.memoryUsage().rss / 1024 / 1024);
           }
         }
-        if (limitMB) assert(process.memoryUsage().rss < limitMB * 1024 * 1024, util.format('Uses less than %dMb RAM', limitMB));
-        return os.freemem() / os.totalmem();
+        return process.memoryUsage().rss / 1024 / 1024;
       }
 
-      it('10,000 updates in 10s and uses <10% free memory', function() {
+      it('1,000 updates in 5s and uses <30MB of RAM', function() {
+        this.timeout(5000);
+        var rss = executeUpdates(pattern, cycle, 1 * 1000);
+        assert(rss < limitMB, util.format('Uses less than %dMB of RAM (actual %sMB)', limitMB, rss.toFixed()));
+      });
+
+      it('5,000 updates in 10s and uses <30MB of RAM', function() {
         this.timeout(10000);
-        var endRAM = executeUpdates(pattern, cycle, 10 * 1000, limitMB);
-        assert(endRAM / startRAM < 1.1, 'Uses less than 10% of free RAM');
+        var rss = executeUpdates(pattern, cycle, 5 * 1000);
+        assert(rss < limitMB, util.format('Uses less than %dMB of RAM (actual %sMB)', limitMB, rss.toFixed()));
       });
 
-      it('100,000 updates in 30s and uses <20% free memory', function() {
-        this.timeout(30000);
-        var endRAM = executeUpdates(pattern, cycle, 100 * 1000, limitMB);
-        assert(endRAM / startRAM < 1.2, 'Uses less than 20% of free RAM');
+      it('10,000 updates in 15s and uses <30MB of RAM', function() {
+        this.timeout(15000);
+        var rss = executeUpdates(pattern, cycle, 10 * 1000);
+        assert(rss < limitMB, util.format('Uses less than %dMB of RAM (actual %sMB)', limitMB, rss.toFixed()));
       });
-
-      it('1,000,000 updates in 1min and uses <30% free memory', function() {
+ 
+      it('50,000 updates in 60s and uses <30MB of RAM', function() {
         this.timeout(60000);
-        var endRAM = executeUpdates(pattern, cycle, 1000 * 1000, limitMB);
-        assert(endRAM / startRAM < 1.3, 'Uses less than 30% of free RAM');
+        var rss = executeUpdates(pattern, cycle, 50 * 1000);
+        assert(rss < limitMB, util.format('Uses less than %dMB of RAM (actual %sMB)', limitMB, rss.toFixed()));
       });
 
     });
