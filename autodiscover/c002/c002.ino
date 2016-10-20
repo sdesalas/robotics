@@ -213,15 +213,15 @@ void act() {
 
 void sense() {
   // Light Sensor
-  Serial.print("l-");
-  Serial.println(map(analogRead(LIGHT), 0, 1023, 0, 255)); 
   Serial.print("g-");
   Serial.println(digitalRead(LED_G));
+  Serial.print("l-");
+  Serial.println(map(analogRead(LIGHT), 0, 1023, 0, 255)); 
   Serial.print("r-");
   Serial.println(digitalRead(LED_R));
   Serial.print("b-");
   Serial.println(currentPitch);
-  Serial.print("r-");
+  Serial.print("w-");
   Serial.println(getRFMessage());
 }
 

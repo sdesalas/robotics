@@ -52,9 +52,8 @@ class Device extends Observable {
 
 	disconnect(reason) {
 		console.debug('Device.prototype.disconnect()', reason);
-		device = this;
 		if (this.connection && this.connection.isOpen()) {
-			this.connection.close(function() { device.connection = null; });
+			this.connection.close(() => { this.connection = null; });
 		}
 		this.emit('disconnect', this.id, reason);
 	}
