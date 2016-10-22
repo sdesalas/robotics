@@ -4,7 +4,6 @@ const fs = require('fs');
 const util = require('util');
 const fse = require('fs-extra');
 const crypto = require('crypto');
-const md5 = crypto.createHash('md5');
 const Observable = require('events');
 const SerialPort = require('serialport');
 const readline = SerialPort.parsers.readline('\n');
@@ -16,8 +15,8 @@ class Device extends Observable {
 	constructor(port, index) {
 		super();
 		console.debug('new Device(port)', port.id);
-		this.id = md5.update(port.pnp).digest('hex').substr(0, 8);
-		this.key = String.fromCharCode(index + 48);
+		this.id = crypto.createHash('md5').update(port.pnp).digest('hex').substr(0, 4);
+		this.key = crypto.createHash('md5').update(port.pnp).digest('base64').substr(0, 2);
 		this.port = port;
 		this.dataPath = './data/' + this.id;
 		this.inputPath = this.dataPath + '/in';

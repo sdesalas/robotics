@@ -1,6 +1,6 @@
 var os = require('os');
 var util = require('util');
-var assert = require('assert');
+var assert = require('./assert-fuzzy');
 var Pattern = require('../lib/Pattern.js');
 
 
@@ -28,29 +28,29 @@ describe('lib/Pattern.js', function() {
     var pattern = new Pattern();
 
     it('Compares two strings and returns deviation', function() {
-      assert.strictEqual(pattern.compare('a', 'a'), 0);
-      assert.strictEqual(pattern.compare('a', 'b'), 1);
-      assert.strictEqual(pattern.compare('aa', 'ab'), 0.5);
-      assert.strictEqual(pattern.compare('aaa', 'abc'), 2/3);
-      assert.strictEqual(pattern.compare('abc', 'abd'), 1/3);
-      assert.strictEqual(pattern.compare('abc', 'ab'), 1/3);
-      assert.strictEqual(pattern.compare('abc', 'abcd'), 1/4);
-      assert.strictEqual(pattern.compare('abc', 'abcde'), 2/5);
-      assert.strictEqual(pattern.compare('ab', 'abcde'), 3*(1/5));
-      assert.strictEqual(pattern.compare('abc', 'abcdef'), 1/2);
-      assert.strictEqual(pattern.compare('', 'abc'), 1);
+      assert.around(pattern.compare('a', 'a'), 0);
+      assert.around(pattern.compare('a', 'b'), 1);
+      assert.around(pattern.compare('aa', 'ab'), 0.5);
+      assert.around(pattern.compare('aaa', 'abc'), 2/3);
+      assert.around(pattern.compare('abc', 'abd'), 1/3);
+      assert.around(pattern.compare('abc', 'ab'), 1/3);
+      assert.around(pattern.compare('abc', 'abcd'), 1/4);
+      assert.around(pattern.compare('abc', 'abcde'), 2/5);
+      assert.around(pattern.compare('ab', 'abcde'), 3/5);
+      assert.around(pattern.compare('abc', 'abcdef'), 1/2);
+      assert.around(pattern.compare('', 'abc'), 1);
     });
 
     it('Compares two strings and uses history to return deviation', function() {
-      assert.strictEqual(pattern.compare('a', 'a', ['a']), 0);
-      assert.strictEqual(pattern.compare('a', 'b', ['b']), 1);
-      assert.strictEqual(pattern.compare('a', 'b', ['a']), 0.5);
-      assert.strictEqual(pattern.compare('a', 'b', ['a', 'b']), 2/3);
-      assert.strictEqual(pattern.compare('a', 'b', ['b', 'a', 'b']), 3/4);
-      assert.strictEqual(pattern.compare('ab', 'aa', ['aa', 'aa']), 0.5);
-      assert.strictEqual(pattern.compare('ab', 'aa', ['ab', 'aa']), 2/6);
-      assert.strictEqual(pattern.compare('aaa', 'abc', ['aba', 'aaa', '']), (1/12)+(1/12)+(1/12)+(1/12)+(1/12)+(1/12));
-      assert.strictEqual(pattern.compare('aaa', 'abc', ['aba', 'aa', 'vsad']), 10/16);
+      assert.around(pattern.compare('a', 'a', ['a']), 0);
+      assert.around(pattern.compare('a', 'b', ['b']), 1);
+      assert.around(pattern.compare('a', 'b', ['a']), 0.5);
+      assert.around(pattern.compare('a', 'b', ['a', 'b']), 2/3);
+      assert.around(pattern.compare('a', 'b', ['b', 'a', 'b']), 3/4);
+      assert.around(pattern.compare('ab', 'aa', ['aa', 'aa']), 0.5);
+      assert.around(pattern.compare('ab', 'aa', ['ab', 'aa']), 2/6);
+      assert.around(pattern.compare('aaa', 'abc', ['aba', 'aaa', '']), 1/2);
+      assert.around(pattern.compare('aaa', 'abc', ['aba', 'aa', 'vsad']), 10/16);
     });
 
   });
@@ -150,12 +150,22 @@ describe('lib/Pattern.js', function() {
         ['C:0', 'D:0', 'X:1', 'a:0', 'b:0', 'L:120', 'R:0']
       ], pattern = new Pattern();
 
-      assert.deepStrictEqual(filterChanges(pattern, cycles), [
-        {data: 'L:67', expected: 'L:126', deviation: 9*(1/15), surprise: 1},
-        {data: 'L:120', expected: 'L:67', deviation: 5*(1/15), surprise: 1},
-        {data: 'L:119', expected: 'L:120', deviation: (1/20)+(1/20)+(1/20)+(1/20)+(1/20)+(1/20)+(1/20)+(1/20)+(1/20), surprise: 1},
-        {data: 'L:120', expected: 'L:119', deviation: (1/20)+(1/20)+(1/20)+(1/20)+(1/20)+(1/20), surprise: 1}
-      ]);
+      var result = filterChanges(pattern, cycles);
+
+      assert.compareObjects({
+        actual: result,
+        expected: [
+          {data: 'L:67', expected: 'L:126', deviation: 9/15, surprise: 1},
+          {data: 'L:120', expected: 'L:67', deviation: 5/15, surprise: 1},
+          {data: 'L:119', expected: 'L:120', deviation: 9/20, surprise: 1},
+          {data: 'L:120', expected: 'L:119', deviation: 6/20, surprise: 1}
+        ],
+        ignore: ['deviation']
+      });
+      assert.around(result[0].deviation, 9/15);
+      assert.around(result[1].deviation, 5/15);
+      assert.around(result[2].deviation, 9/20);
+      assert.around(result[3].deviation, 6/20);
 
     });
 
@@ -200,7 +210,7 @@ describe('lib/Pattern.js', function() {
         var rss = executeUpdates(pattern, cycle, 10 * 1000);
         assert(rss < limitMB, util.format('Uses less than %dMB of RAM (actual %sMB)', limitMB, rss.toFixed()));
       });
- 
+
       it('50,000 updates in 60s and uses <30MB of RAM', function() {
         this.timeout(60000);
         var rss = executeUpdates(pattern, cycle, 50 * 1000);

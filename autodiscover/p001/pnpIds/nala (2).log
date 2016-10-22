@@ -1,0 +1,122 @@
+Nala.prototype.wakeUp() { debug: true,
+  listeners: 
+   { deviceready: [Function],
+     awake: [Function],
+     deviceremoved: [Function] },
+  baudRate: 115200,
+  memSize: 512,
+  manufacturers: /(wch)|(arduino)|(1a86)/i }
+2 USB ports available. [ { comName: '/dev/ttyAMA0',
+    manufacturer: undefined,
+    serialNumber: undefined,
+    pnpId: undefined,
+    vendorId: undefined,
+    productId: undefined },
+  { comName: '/dev/ttyUSB0',
+    manufacturer: '1a86',
+    serialNumber: '1a86_USB2.0-Serial',
+    pnpId: 'usb-1a86_USB2.0-Serial-if00-port0',
+    vendorId: '0x1a86',
+    productId: '0x7523' } ]
+Nala.prototype.parse() { comName: '/dev/ttyUSB0',
+  manufacturer: '1a86',
+  serialNumber: '1a86_USB2.0-Serial',
+  pnpId: 'usb-1a86_USB2.0-Serial-if00-port0',
+  vendorId: '0x1a86',
+  productId: '0x7523' }
+Nala.prototype.connect() { id: '/dev/ttyUSB0',
+  baudRate: 115200,
+  session: 'usb-1a86_USB2.0-Serial-if00-port0',
+  pnp: 'usb-1a86_USB2.0-Serial-if00-port0' }
+new Device(port) /dev/ttyUSB0
+Device.prototype.connect()
+2016-10-20T00:05:02.662Z: I am awake and have 1 peripheral device/s.
+2016-10-20T00:05:02.743Z: Device "8241b6fd" connected. Data path: ./data/8241b6fd
+Nala.prototype.data() 0l-213
+Nala.prototype.data() 0g-0
+Nala.prototype.data() 0r-0
+Nala.prototype.data() 0b-0
+Nala.prototype.data() 0r-
+Nala.prototype.data() 0l-212
+Nala.prototype.data() 0g-0
+Nala.prototype.data() 0r-0
+Nala.prototype.data() 0b-0
+Nala.prototype.data() 0r-
+Nala.prototype.data() 0l-213
+Nala.prototype.interpret() { data: '0l-213\r',
+  expected: '0l-212\r',
+  deviation: 0.4285714285714285,
+  surprise: 1 }
+Nala.prototype.data() 0g-0
+Nala.prototype.data() 0r-0
+Nala.prototype.data() 0b-0
+Nala.prototype.data() 0r-
+Nala.prototype.data() 0l-214
+Nala.prototype.interpret() { data: '0l-214\r',
+  expected: '0l-213\r',
+  deviation: 0.3333333333333333,
+  surprise: 1 }
+Nala.prototype.data() 0g-0
+Nala.prototype.data() 0r-0
+Nala.prototype.data() 0b-0
+Nala.prototype.data() 0r-
+Nala.prototype.data() 0l-214
+Nala.prototype.data() 0g-0
+Nala.prototype.data() 0r-0
+Nala.prototype.data() 0b-0
+Nala.prototype.data() 0r-
+Nala.prototype.data() 0l-213
+Nala.prototype.data() 0g-0
+Nala.prototype.data() 0r-0
+Nala.prototype.data() 0b-0
+Nala.prototype.data() 0r-
+Nala.prototype.data() 0l-212
+Nala.prototype.data() 0g-0
+Nala.prototype.data() 0r-0
+Nala.prototype.data() 0b-0
+Nala.prototype.data() 0r-
+Nala.prototype.data() 0l-211
+Nala.prototype.data() 0g-0
+Nala.prototype.data() 0r-0
+Nala.prototype.data() 0b-0
+Nala.prototype.data() 0r-
+Nala.prototype.data() 0l-211
+Nala.prototype.data() 0g-0
+Nala.prototype.data() 0r-0
+Nala.prototype.data() 0b-0
+Nala.prototype.data() 0r-
+Nala.prototype.data() 0l-212
+Nala.prototype.data() 0g-0
+Nala.prototype.data() 0r-0
+Nala.prototype.data() 0b-0
+Nala.prototype.data() 0r-
+Nala.prototype.data() 0l-213
+Nala.prototype.data() 0g-0
+Nala.prototype.data() 0r-0
+Nala.prototype.data() 0b-0
+Nala.prototype.data() 0r-
+Nala.prototype.data() 0l-214
+Nala.prototype.data() 0g-0
+Nala.prototype.data() 0r-0
+Nala.prototype.data() 0b-0
+Nala.prototype.data() 0r-
+Nala.prototype.data() 0l-214
+Nala.prototype.data() 0g-0
+Nala.prototype.data() 0r-0
+Nala.prototype.data() 0b-0
+Nala.prototype.data() 0r-
+Nala.prototype.data() 0l-213
+Nala.prototype.data() 0g-0
+Nala.prototype.data() 0r-0
+Nala.prototype.data() 0b-0
+Nala.prototype.data() 0r-
+Nala.prototype.data() 0l-213
+Nala.prototype.data() 0g-0
+Nala.prototype.data() 0r-0
+Nala.prototype.data() 0b-0
+Nala.prototype.data() 0r-
+Nala.prototype.data() 0l-212
+Nala.prototype.data() 0g-0
+Nala.prototype.data() 0r-0
+Nala.prototype.data() 0b-0
+Nala.prototype.data() 0r-
