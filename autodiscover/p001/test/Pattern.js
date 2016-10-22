@@ -1,6 +1,6 @@
 var os = require('os');
 var util = require('util');
-var assert = require('assert');
+var assert = require('./assert-extra');
 var Pattern = require('../lib/Pattern.js');
 
 
@@ -28,29 +28,33 @@ describe('lib/Pattern.js', function() {
     var pattern = new Pattern();
 
     it('Compares two strings and returns deviation', function() {
-      assert.strictEqual(pattern.compare('a', 'a'), 0);
-      assert.strictEqual(pattern.compare('a', 'b'), 1);
-      assert.strictEqual(pattern.compare('aa', 'ab'), 0.5);
-      assert.strictEqual(pattern.compare('aaa', 'abc'), 2/3);
-      assert.strictEqual(pattern.compare('abc', 'abd'), 1/3);
-      assert.strictEqual(pattern.compare('abc', 'ab'), 1/3);
-      assert.strictEqual(pattern.compare('abc', 'abcd'), 1/4);
-      assert.strictEqual(pattern.compare('abc', 'abcde'), 2/5);
-      assert.strictEqual(pattern.compare('ab', 'abcde'), 3*(1/5));
-      assert.strictEqual(pattern.compare('abc', 'abcdef'), 1/2);
-      assert.strictEqual(pattern.compare('', 'abc'), 1);
+      assert.equal(pattern.compare('a', 'a'), 0);
+      assert.around(pattern.compare('a', 'b'), 0.67);
+      assert.around(pattern.compare('a', 'z'), 0.98);
+      assert.around(pattern.compare('aa', 'ab'), 0.3);
+      assert.around(pattern.compare('aaa', 'abc'), 0.5);
+      assert.around(pattern.compare('abc', 'abd'), 0.25);
+      assert.around(pattern.compare('abc', 'ab'), 0.4);
+      assert.around(pattern.compare('abc', 'abcd'), 0.3);
+      assert.around(pattern.compare('abc', 'abcde'), 0.5);
+      assert.around(pattern.compare('ab', 'abcde'), 0.65);
+      assert.around(pattern.compare('abc', 'abcdef'), 0.55);
+      assert.around(pattern.compare('abc', 'azxp'), 0.8);
+      assert.equal(pattern.compare('', 'abc'), 1, 1);
     });
 
     it('Compares two strings and uses history to return deviation', function() {
-      assert.strictEqual(pattern.compare('a', 'a', ['a']), 0);
-      assert.strictEqual(pattern.compare('a', 'b', ['b']), 1);
-      assert.strictEqual(pattern.compare('a', 'b', ['a']), 0.5);
-      assert.strictEqual(pattern.compare('a', 'b', ['a', 'b']), 2/3);
-      assert.strictEqual(pattern.compare('a', 'b', ['b', 'a', 'b']), 3/4);
-      assert.strictEqual(pattern.compare('ab', 'aa', ['aa', 'aa']), 0.5);
-      assert.strictEqual(pattern.compare('ab', 'aa', ['ab', 'aa']), 2/6);
-      assert.strictEqual(pattern.compare('aaa', 'abc', ['aba', 'aaa', '']), (1/12)+(1/12)+(1/12)+(1/12)+(1/12)+(1/12));
-      assert.strictEqual(pattern.compare('aaa', 'abc', ['aba', 'aa', 'vsad']), 10/16);
+      assert.equal(pattern.compare('a', 'a', ['a']), 0);
+      assert.around(pattern.compare('a', 'b', ['b']), 0.67);
+      assert.around(pattern.compare('a', 'b', ['a']), 0.3);
+      assert.around(pattern.compare('a', 'b', ['a', 'x']), 0.55);
+      assert.around(pattern.compare('a', 'b', ['b', 'a', 'b']), 0.5);
+      assert.around(pattern.compare('ab', 'aa', ['aa', 'aa']), 0.33);
+      assert.around(pattern.compare('ab', 'aa', ['ab', 'aa']), 0.2);
+      assert.around(pattern.compare('aaa', 'abc', ['aba', 'aaa', '']), 0.5);
+      assert.around(pattern.compare('aaa', 'abc', ['aba', 'aa', 'vsad']), 0.6);
+      assert.around(pattern.compare('aaa', 'xzr', ['aba', 'aa', 'xif']), 0.7);
+      assert.around(pattern.compare('aaa', 'xzr', ['xAg', '', 'xif']), 0.99);
     });
 
   });
@@ -89,7 +93,8 @@ describe('lib/Pattern.js', function() {
       pattern.update('thr33');
       assert.deepEqual(pattern.buffer, ['one', 'two', 'three', 'one', 'two', 'thr33']);
       assert.deepEqual(pattern.sensorCycle, ['one', 'two', 'thr33']);
-      assert.deepEqual(pattern.lastUpdate , {data: 'thr33', expected: 'three', deviation: 4/10, surprise: 1});
+      assert.equal(pattern.lastUpdate.surprise, 1);
+      assert.around(pattern.lastUpdate.deviation, 0.4);
       assert.deepEqual(pattern.sensorHistory[2] , ['three']);
       pattern.update('one');
       assert.deepEqual(pattern.buffer, ['one', 'two', 'three', 'one', 'two', 'thr33', 'one']);
@@ -104,7 +109,8 @@ describe('lib/Pattern.js', function() {
       pattern.update('three');
       assert.deepEqual(pattern.buffer, ['one', 'two', 'three', 'one', 'two', 'thr33', 'one', 'two', 'three']);
       assert.deepEqual(pattern.sensorCycle, ['one', 'two', 'three']);
-      assert.deepEqual(pattern.lastUpdate, {data: 'three', expected: 'thr33', deviation: 3/15, surprise: 0});
+      assert.equal(pattern.lastUpdate.surprise, 1);
+      assert.around(pattern.lastUpdate.deviation, 0.2);
       assert.deepEqual(pattern.sensorHistory[2] , ['thr33', 'three']);
     });
 
@@ -118,44 +124,58 @@ describe('lib/Pattern.js', function() {
 
     it('Detects single DIGITAL sensor changes during repetitive cycles.', () => {
       var cycles = [
-        ['C:0', 'D:0', 'X:1', 'b:0', 'R:1'],
-        ['C:0', 'D:0', 'X:1', 'b:0', 'R:1'],
-        ['C:0', 'D:0', 'X:1', 'b:0', 'R:1'],
-        ['C:0', 'D:0', 'X:1', 'b:1', 'R:1'],
-        ['C:0', 'D:0', 'X:1', 'b:1', 'R:1'],
-        ['C:0', 'D:0', 'X:1', 'b:1', 'R:1'],
-        ['C:0', 'D:0', 'X:1', 'b:1', 'R:1'],
-        ['C:0', 'D:0', 'X:1', 'b:1', 'R:1'],
-        ['C:0', 'D:0', 'X:1', 'b:1', 'R:1'],
-        ['C:0', 'D:0', 'X:1', 'b:1', 'R:1'],
-        ['C:0', 'D:0', 'X:1', 'b:1', 'R:1'],
-        ['C:0', 'D:0', 'X:1', 'b:0', 'R:1']
-      ], pattern = new Pattern();
+        ['0C:0', '0D:0', '0X:1', '0b:0', '0R:1'],
+        ['0C:0', '0D:0', '0X:1', '0b:0', '0R:1'],
+        ['0C:0', '0D:0', '0X:1', '0b:0', '0R:1'],
+        ['0C:0', '0D:0', '0X:1', '0b:1', '0R:1'],
+        ['0C:0', '0D:0', '0X:1', '0b:1', '0R:1'],
+        ['0C:0', '0D:0', '0X:1', '0b:1', '0R:1'],
+        ['0C:0', '0D:0', '0X:1', '0b:1', '0R:1'],
+        ['0C:0', '0D:0', '0X:1', '0b:1', '0R:1'],
+        ['0C:0', '0D:0', '0X:1', '0b:1', '0R:1'],
+        ['0C:0', '0D:0', '0X:1', '0b:1', '0R:1'],
+        ['0C:0', '0D:0', '0X:1', '0b:1', '0R:1'],
+        ['0C:0', '0D:0', '0X:1', '0b:1', '0R:1'],
+        ['0C:0', '0D:0', '0X:1', '0b:0', '0R:1'],
+        ['0C:0', '0D:0', '0X:1', '0b:0', '0R:1'],
+        ['0C:0', '0D:0', '0X:1', '0b:0', '0R:1']
+      ], pattern = new Pattern({ history: 3 });
 
-      assert.deepStrictEqual(filterChanges(pattern, cycles), [
-        {data: 'b:1', expected: 'b:0', deviation: 1/3, surprise: 1},
-        {data: 'b:0', expected: 'b:1', deviation: 1/3, surprise: 1}
-      ]);
+      var result = filterChanges(pattern, cycles);
+
+      assert.compareObjectsAndIgnore(result, [
+        {data: '0b:1', expected: '0b:0', deviation: 0.2, surprise: 1},
+        {data: '0b:0', expected: '0b:1', deviation: 0.2, surprise: 1}
+      ], ['deviation']);
+      assert.around(result[0].deviation, 0.2);
+      assert.around(result[1].deviation, 0.2);
 
     });
 
     it('Detects single ANALOG sensor changes during repetitive cycles', () => {
       var cycles = [
-        ['C:0', 'D:0', 'X:1', 'a:0', 'b:0', 'L:121', 'R:0'],
-        ['C:0', 'D:0', 'X:1', 'a:0', 'b:0', 'L:123', 'R:0'],
-        ['C:0', 'D:0', 'X:1', 'a:0', 'b:0', 'L:126', 'R:0'],
-        ['C:0', 'D:0', 'X:1', 'a:0', 'b:0', 'L:67', 'R:0'],
-        ['C:0', 'D:0', 'X:1', 'a:0', 'b:0', 'L:120', 'R:0'],
-        ['C:0', 'D:0', 'X:1', 'a:0', 'b:0', 'L:119', 'R:0'],
-        ['C:0', 'D:0', 'X:1', 'a:0', 'b:0', 'L:120', 'R:0']
-      ], pattern = new Pattern();
+        ['0C:0', '0D:0', '0X:1', '0a:0', '0b:0', '0L:123', '0R:0'],
+        ['0C:0', '0D:0', '0X:1', '0a:0', '0b:0', '0L:120', '0R:0'],
+        ['0C:0', '0D:0', '0X:1', '0a:0', '0b:0', '0L:121', '0R:0'],
+        ['0C:0', '0D:0', '0X:1', '0a:0', '0b:0', '0L:123', '0R:0'],
+        ['0C:0', '0D:0', '0X:1', '0a:0', '0b:0', '0L:126', '0R:0'],
+        ['0C:0', '0D:0', '0X:1', '0a:0', '0b:0', '0L:67',  '0R:0'],
+        ['0C:0', '0D:0', '0X:1', '0a:0', '0b:0', '0L:120', '0R:0'],
+        ['0C:0', '0D:0', '0X:1', '0a:0', '0b:0', '0L:119', '0R:0'],
+        ['0C:0', '0D:0', '0X:1', '0a:0', '0b:0', '0L:120', '0R:0']
+      ], pattern = new Pattern({ history: 10 });
 
-      assert.deepStrictEqual(filterChanges(pattern, cycles), [
-        {data: 'L:67', expected: 'L:126', deviation: 9*(1/15), surprise: 1},
-        {data: 'L:120', expected: 'L:67', deviation: 5*(1/15), surprise: 1},
-        {data: 'L:119', expected: 'L:120', deviation: (1/20)+(1/20)+(1/20)+(1/20)+(1/20)+(1/20)+(1/20)+(1/20)+(1/20), surprise: 1},
-        {data: 'L:120', expected: 'L:119', deviation: (1/20)+(1/20)+(1/20)+(1/20)+(1/20)+(1/20), surprise: 1}
-      ]);
+      var result = filterChanges(pattern, cycles);
+
+      assert.compareObjectsAndIgnore(result, [
+        {data: '0L:67', expected: '0L:126', deviation: 0.5, surprise: 1},
+        {data: '0L:120', expected: '0L:67', deviation: 0.2, surprise: 1},
+        {data: '0L:119', expected: '0L:120', deviation: 0.3, surprise: 1},
+        {data: '0L:120', expected: '0L:119', deviation: 0.2, surprise: 1}
+      ], ['deviation']);
+      assert.around(result[0].deviation, 0.5);
+      assert.around(result[1].deviation, 0.2);
+      assert.around(result[2].deviation, 0.3);
 
     });
 
@@ -166,7 +186,7 @@ describe('lib/Pattern.js', function() {
           startRAM = os.freemem() / os.totalmem();
 
       beforeEach(() => {
-        pattern = new Pattern();
+        pattern = new Pattern({ history: 5 });
       });
 
       function executeUpdates(pattern, cycle, runs, showlog) {
@@ -200,7 +220,7 @@ describe('lib/Pattern.js', function() {
         var rss = executeUpdates(pattern, cycle, 10 * 1000);
         assert(rss < limitMB, util.format('Uses less than %dMB of RAM (actual %sMB)', limitMB, rss.toFixed()));
       });
- 
+
       it('50,000 updates in 60s and uses <30MB of RAM', function() {
         this.timeout(60000);
         var rss = executeUpdates(pattern, cycle, 50 * 1000);

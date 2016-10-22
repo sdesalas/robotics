@@ -11,7 +11,7 @@ class Pattern extends Array {
 		// Level 1 = basic cycle, single loop of all sensor input
 		this.sensorCycle = [];
 		this.sensorHistory = {};
-		this.options.historyLength = options.historyLength || 3;
+		this.options.history = options.history || 10;
 		// Initialize
 		if (options.data) {
 				options.data.forEach(this.update.bind(this));
@@ -30,17 +30,17 @@ class Pattern extends Array {
 		if (index > -1) {
 			// Exact match ...
 			history.unshift(this.sensorCycle.splice(0, index + 1).pop());
-			history.splice(this.options.historyLength);
+			history.splice(this.options.history);
 			deviation = 0;
 		} else {
 			// No match? Is there a pattern yet?
 			if (patternExists) {
 				deviation = this.compare(data, expected, history);
-				surprise = (deviation > 0.2) ? 1 : 0;
-				if (deviation < 0.5) {
+				surprise = (deviation > 0.16) ? 1 : 0;
+				if (deviation < 0.4) {
 					// Looks like a match ...
 					history.unshift(this.sensorCycle.shift());
-					history.splice(this.options.historyLength);
+					history.splice(this.options.history);
 				}
 			}
 		}
@@ -66,16 +66,17 @@ class Pattern extends Array {
 	compare(actual, expected, history) {
 		if (!actual || !expected) return 1;
 		if (actual === expected) return 0;
-		var history = (history || []).slice(),
-				deviation = 0,
+		var deviation = 0,
 				lenMax = actual.length;
-		history.push(expected);
+		history = [expected].concat(history || []);
 		history.forEach(pastValue => { if (pastValue.length > lenMax) lenMax = pastValue.length; });
 		var step = 1/(lenMax*history.length);
 		history.forEach(pastValue => {
+			var diff;
 			for (var i = 0; i < lenMax; i++) {
-				if (pastValue.charCodeAt(i) !== actual.charCodeAt(i))
-					deviation += step;
+				diff = Math.abs(pastValue.charCodeAt(i) - actual.charCodeAt(i));
+				if (isNaN(diff)) deviation += step;
+				else if (diff > 0) deviation += step * (1 - (1 / ((diff + 2) * diff)));
 			}
 		});
 		return deviation;
