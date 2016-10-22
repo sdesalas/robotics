@@ -132,40 +132,44 @@ describe('lib/Pattern.js', function() {
         ['C:0', 'D:0', 'X:1', 'b:0', 'R:1']
       ], pattern = new Pattern();
 
-      assert.deepStrictEqual(filterChanges(pattern, cycles), [
-        {data: 'b:1', expected: 'b:0', deviation: 1/3, surprise: 1},
-        {data: 'b:0', expected: 'b:1', deviation: 1/3, surprise: 1}
-      ]);
+      var result = filterChanges(pattern, cycles);
+
+      assert.compareObjects({
+        actual: result,
+        expected: [
+          {data: 'b:1', expected: 'b:0', deviation: 1/3, surprise: 1},
+          {data: 'b:0', expected: 'b:1', deviation: 1/4, surprise: 1}
+        ],
+        ignore: ['deviation']
+      });
+      assert.around(result[0].deviation, 1/3);
+      assert.around(result[1].deviation, 1/4);    
 
     });
 
     it('Detects single ANALOG sensor changes during repetitive cycles', () => {
       var cycles = [
-        ['C:0', 'D:0', 'X:1', 'a:0', 'b:0', 'L:121', 'R:0'],
-        ['C:0', 'D:0', 'X:1', 'a:0', 'b:0', 'L:123', 'R:0'],
-        ['C:0', 'D:0', 'X:1', 'a:0', 'b:0', 'L:126', 'R:0'],
-        ['C:0', 'D:0', 'X:1', 'a:0', 'b:0', 'L:67', 'R:0'],
-        ['C:0', 'D:0', 'X:1', 'a:0', 'b:0', 'L:120', 'R:0'],
-        ['C:0', 'D:0', 'X:1', 'a:0', 'b:0', 'L:119', 'R:0'],
-        ['C:0', 'D:0', 'X:1', 'a:0', 'b:0', 'L:120', 'R:0']
-      ], pattern = new Pattern();
+        ['C:0', 'D:0', 'X:1', 'a:0', 'b:0', 'L:7', 'R:0'],
+        ['C:0', 'D:0', 'X:1', 'a:0', 'b:0', 'L:8', 'R:0'],
+        ['C:0', 'D:0', 'X:1', 'a:0', 'b:0', 'L:7', 'R:0'],
+        ['C:0', 'D:0', 'X:1', 'a:0', 'b:0', 'L:3', 'R:0'],
+        ['C:0', 'D:0', 'X:1', 'a:0', 'b:0', 'L:7', 'R:0'],
+        ['C:0', 'D:0', 'X:1', 'a:0', 'b:0', 'L:7', 'R:0'],
+        ['C:0', 'D:0', 'X:1', 'a:0', 'b:0', 'L:7', 'R:0']
+      ], pattern = new Pattern({ history: 5});
 
       var result = filterChanges(pattern, cycles);
 
       assert.compareObjects({
         actual: result,
         expected: [
-          {data: 'L:67', expected: 'L:126', deviation: 9/15, surprise: 1},
-          {data: 'L:120', expected: 'L:67', deviation: 5/15, surprise: 1},
-          {data: 'L:119', expected: 'L:120', deviation: 9/20, surprise: 1},
-          {data: 'L:120', expected: 'L:119', deviation: 6/20, surprise: 1}
+          {data: 'L:8', expected: 'L:7', deviation: 7/9, surprise: 1},
+          {data: 'L:3', expected: 'L:7', deviation: 5/9, surprise: 1}
         ],
         ignore: ['deviation']
       });
-      assert.around(result[0].deviation, 9/15);
-      assert.around(result[1].deviation, 5/15);
-      assert.around(result[2].deviation, 9/20);
-      assert.around(result[3].deviation, 6/20);
+      assert.around(result[0].deviation, 3/9);
+      assert.around(result[1].deviation, 3/9);
 
     });
 

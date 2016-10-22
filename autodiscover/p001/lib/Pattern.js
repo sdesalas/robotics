@@ -11,7 +11,7 @@ class Pattern extends Array {
 		// Level 1 = basic cycle, single loop of all sensor input
 		this.sensorCycle = [];
 		this.sensorHistory = {};
-		this.options.historyLength = options.historyLength || 3;
+		this.options.history = options.history || 10;
 		// Initialize
 		if (options.data) {
 				options.data.forEach(this.update.bind(this));
@@ -30,7 +30,7 @@ class Pattern extends Array {
 		if (index > -1) {
 			// Exact match ...
 			history.unshift(this.sensorCycle.splice(0, index + 1).pop());
-			history.splice(this.options.historyLength);
+			history.splice(this.options.history);
 			deviation = 0;
 		} else {
 			// No match? Is there a pattern yet?
@@ -40,7 +40,7 @@ class Pattern extends Array {
 				if (deviation < 0.5) {
 					// Looks like a match ...
 					history.unshift(this.sensorCycle.shift());
-					history.splice(this.options.historyLength);
+					history.splice(this.options.history);
 				}
 			}
 		}
