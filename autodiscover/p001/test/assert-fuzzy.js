@@ -30,11 +30,11 @@ assert.around = function (val, estimate, msg) {
     to = 0.2;
   }
   else if (Math.abs(estimate) < 1) {
-    from = estimate - 0.1;
-    to = estimate + 0.1;
+    from = estimate - 0.05;
+    to = estimate + 0.05;
   } else {
-    from = estimate * 0.8;
-    to = estimate * 1.2;
+    from = estimate * 0.9;
+    to = estimate * 1.1;
   }
   return assert.between(val, from, to, util.format('%s around %s', val.toFixed(2), estimate.toFixed(2)));
 }
