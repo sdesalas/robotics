@@ -12,11 +12,11 @@ const Nala = require('../');
 class Device extends Observable {
 
 	// Initializes an attached microcontroller
-	constructor(port, index) {
+	constructor(port, id) {
 		super();
-		console.debug('new Device(port)', port.id);
-		this.id = crypto.createHash('md5').update(port.pnp).digest('hex').substr(0, 4);
-		this.key = crypto.createHash('md5').update(port.pnp).digest('base64').substr(0, 2);
+		console.debug('new Device(port)', port.comName);
+		this.id = port.id;
+		this.key = port.key;
 		this.port = port;
 		this.dataPath = './data/' + this.id;
 		this.inputPath = this.dataPath + '/in';
@@ -33,7 +33,7 @@ class Device extends Observable {
 	connect() {
 		console.debug('Device.prototype.connect()');
 		var device = this;
-		var connection = new SerialPort(this.port.id, { parser: readline, baudRate: this.port.baudRate });
+		var connection = new SerialPort(this.port.comName, { parser: readline, baudRate: this.port.baudRate });
 		connection.on('data', data => this.emit('data', this.key + data));
 		connection.on('open', function(error) {
 			if (error) {
@@ -60,7 +60,7 @@ class Device extends Observable {
 	write(data) {
 		console.debug('Device.prototype.write()', data);
 		if (this.connection.isOpen()) {
-			this.connection.write(data, console.debug.bind(console, 'Data written to ' + this.port.id));
+			this.connection.write(data, console.debug.bind(console, 'Data written to ' + this.port.comName));
 		} else {
 			this.connect(function(connection) {
 				connection.write(data);

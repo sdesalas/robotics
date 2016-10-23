@@ -1,9 +1,8 @@
 "use strict";
 
 const fs = require('fs');
-const path = require('path');
 const util = require('util');
-const fse = require('fs-extra');
+const crypto = require('crypto');
 const Observable = require('events');
 const SerialPort = require('serialport');
 const readline = SerialPort.parsers.readline('\n');
@@ -37,21 +36,34 @@ class Nala extends Observable {
 	}
 
 	// YAWN! Time to wake up!
-	// Check the USB ports.. Do we have something that looks interesting?
-	// If so then connect to it
 	wakeUp() {
 		console.debug('Nala.prototype.wakeUp()', this.options);
+		var detectDevices = this.detect.bind(this, (ports) => {
+			this.emit('awake', Object.keys(this.devices).length);
+		});
+		detectDevices();
+		// Keep checking every few seconds if nothing is connected..
+		setInterval(() => {
+			if (Object.keys(this.devices).length === 0) detectDevices();
+		}, 2000);
+		// Go into idle mode
+		this.idle();
+		return this;
+	}
+
+	// Check the USB ports.. Do we have something that looks interesting?
+	// If so then connect to it
+	detect(callback) {
+		console.debug('Nala.prototype.detect()');
 		var manufacturers = this.options.manufacturers;
 		SerialPort.list((function(err, ports) {
 			console.debug('%d USB ports available.', ports.length, ports);
 			ports
 				.filter((p) => p.manufacturer && !!p.manufacturer.match(manufacturers))
 				.map(this.parse.bind(this))
-				.filter((p) => !!p)
+				.filter((p) => p && !this.devices[p.id])
 				.forEach(this.connect.bind(this));
-			this.emit('awake', Object.keys(this.devices).length);
-			// Go into idle mode
-			this.idle();
+			if (callback) callback(ports);
 		}).bind(this));
 		return this;
 	}
@@ -60,12 +72,15 @@ class Nala extends Observable {
 	parse(port) {
 		console.debug('Nala.prototype.parse()', port);
 		if (!port || !port.comName) return null;
-		return {
-			id: port.comName,
+		port = {
+			comName: port.comName,
 			baudRate: this.options.baudRate,
 			session: port.pnpId && port.pnpId.split('\\').pop(),
 			pnp: port.pnpId && port.pnpId.split('\\').splice(0,2).join('://') || 'USB://unknown',
 		};
+		port.id = crypto.createHash('md5').update(port.pnp).digest('hex').substr(0, 4);
+		port.key = crypto.createHash('md5').update(port.pnp).digest('base64').substr(0, 2);
+		return port;
 	}
 
 	// Initialize device connected to port
@@ -79,6 +94,7 @@ class Nala extends Observable {
 		device.on('connected', this.emit.bind(this, 'deviceready', device.id, device.dataPath));
 		device.on('disconnect', this.remove.bind(this, device.id));
 		device.on('data', this.data.bind(this));
+		return this;
 	}
 
 	// Controller device no longer needed
@@ -91,11 +107,11 @@ class Nala extends Observable {
 		}
 	}
 
-	// Event loop
+	// Reflection loop
 	idle() {
 		this.reflect();
 		this.fulfill();
-		setTimeout(this.idle.bind(this), 100);
+		setTimeout(this.idle.bind(this), 500);
 	}
 
 	reflect() {
@@ -118,6 +134,7 @@ class Nala extends Observable {
 		if (cycle.lastUpdate.surprise) {
 			this.interpret(cycle);
 		}
+		return this;
 	}
 
 	interpret(cycle) {
@@ -131,10 +148,12 @@ class Nala extends Observable {
 			source: source,
 			history: history
 		})
+		return this;
 	}
 
 	react() {
 		// Ok we should do something now to avoid pain
+		return this;
 	}
 
 }
