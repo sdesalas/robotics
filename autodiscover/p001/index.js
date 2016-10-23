@@ -8,7 +8,7 @@ const Observable = require('events');
 const SerialPort = require('serialport');
 const readline = SerialPort.parsers.readline('\n');
 const Device = require('./lib/Device');
-const Pattern = require('./lib/Pattern');
+const SensorCycle = require('./lib/SensorCycle');
 
 class Nala extends Observable {
 
@@ -27,8 +27,12 @@ class Nala extends Observable {
 		// Internal fields
 		Nala.debugMode = options.debug;
 		this.devices = {};
-		this.memory = [];
-		this.noise = new Pattern({ length: 512 });
+		this.memory = {
+			input: {},
+			output: {},
+			rel: {}
+		};
+		this.cycle = new SensorCycle({ size: 256 });
 		this.options = options;
 	}
 
@@ -48,7 +52,6 @@ class Nala extends Observable {
 			this.emit('awake', Object.keys(this.devices).length);
 			// Go into idle mode
 			this.idle();
-			this.on('patternchange', this.react);
 		}).bind(this));
 		return this;
 	}
@@ -111,17 +114,23 @@ class Nala extends Observable {
 	// This gets called pretty frequently so should be optimised!
 	data(data) {
 		console.debug('Nala.prototype.data()', data);
-		var pattern = this.noise.update(data);
-		if (pattern.lastUpdate.surprise) {
-			this.interpret(pattern);
+		var cycle = this.cycle.update(data);
+		if (cycle.lastUpdate.surprise) {
+			this.interpret(cycle);
 		}
 	}
 
-	interpret(pattern) {
-		console.debug('Nala.prototype.interpret()', pattern.lastUpdate);
-		// Shit. Change in input pattern.
+	interpret(cycle) {
+		console.debug('Nala.prototype.interpret()', cycle.lastUpdate);
+		// Shit. Change in input cycle.
 		// Was change in pattern due to own action?
 		// If due to own action, is it as expected?
+		var source = cycle.lastUpdate.source;
+		var history = cycle.history[source];
+		console.log({
+			source: source,
+			history: history
+		})
 	}
 
 	react() {
