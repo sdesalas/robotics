@@ -56,4 +56,12 @@ He's called Gluco-bot because thats a re-purposed package of glucosamine tablets
 
 I was a bit too ambitious trying to cut down on size - it doesnt fit in the case basically, I'm thinking AAA batteries instead of AA might do it.
 
+## Pattern Recognition Trainer
+
+![trainer.jpg](trainer.jpg)
+
+A pretty basic setup that allows me to capture environmental sensor data and feed it into a pattern-recognition engine I'm building.
+
+I want the next guy I build to be smart. Like.. amoeba kind of smart.
+
 
