@@ -18,11 +18,13 @@ This one was my first attempt at using NodeJS to communicate between Analog inpu
 
 Fabrication is not my strong point. 
 
-This one was built [using instructions](https://github.com/nodebotsau/simplebot) from much admired tinkerer [Andrew Fisher](https://github.com/ajfisher). 
+This one was built [using instructions](https://github.com/nodebotsau/simplebot) from much admired tinkerer [Andrew Fisher](https://github.com/ajfisher). He had a couple of great [youtube videos](https://www.youtube.com/watch?v=KoACCjtkHIg&feature=youtu.be) that were very helpful too.
 
 ## Bluetooth communication
 
-This was useful as it helped me understand that Bluetooth makes it really easy to abstract communication, once you get it going it works as if you had a USB cable connected. Pity its so hard to setup in the first place, and that the connection is usually pretty flaky.
+This was useful as it helped me understand that Bluetooth makes it really easy to abstract communication, once you get it going it works as if you had a USB cable connected. 
+
+Pity its so hard to setup in the first place, and that the connection is usually pretty flaky.
 
 ## Simplebot v2 (RF Bot)
 
