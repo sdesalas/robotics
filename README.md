@@ -1,6 +1,6 @@
 # robotics
 
-I make stuff. Sometimes it works. Then I put the code here. 
+I make stuff that moves. Sometimes it works. Then I put the code here. 
 
 I mostly use JavaScript (NodeJS) and C++ (Arduino), bit of bash for Linux scripting. 
 
