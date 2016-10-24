@@ -62,6 +62,6 @@ I was a bit too ambitious trying to cut down on size - it doesnt fit in the case
 
 A pretty basic setup that allows me to capture environmental sensor data and feed it into a pattern-recognition engine I'm building.
 
-I want the next guy I build to be smart. Like.. amoeba kind of smart.
+I want the next guy I build to do stuff on his own. Aiming for amoeba-level intelligence.
 
 
