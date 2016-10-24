@@ -10,7 +10,7 @@ There is random code for Microcontrollers, Sensors, Raspberry Pi, OpenWrt, RF, B
 
 ![nala.jpg](nala.jpg)
 
-This one was my first attempt at using NodeJS to communicate between Analog inputs and Linux CPU using the Arduino Yun's Bridge library.
+This one was my first attempt at using NodeJS to communicate between Analog inputs and Linux CPU using the Arduino Yun's Bridge library. This wouldnt have happened without help from the very talented James Fox who got the audio input working with his oscillometer and some spare capacitors he pulled out of an old PC. 
 
 ## Simplebot v1 (Node bot)
 
