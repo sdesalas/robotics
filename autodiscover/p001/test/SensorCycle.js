@@ -95,7 +95,7 @@ describe('class SensorCycle', function() {
       assert.deepEqual(sensorCycle.buffer, ['one>1', 'two>2', 'three>3', 'one>1', 'two>2', 'three>XX']);
       assert.deepEqual(sensorCycle.pattern, ['one', 'two', 'three']);
       assert.deepEqual(sensorCycle.lastUpdate , {data: 'three>XX', source: 'three', payload: 'XX', expected: 'three>3', deviation: 1, surprise: 1});
-      assert.deepEqual(sensorCycle.history['three'], ['3', 'XX']);
+      assert.deepEqual(sensorCycle.history['three'], ['XX', '3']);
       sensorCycle.update('four>4');
       assert.deepEqual(sensorCycle.buffer, ['one>1', 'two>2', 'three>3', 'one>1', 'two>2', 'three>XX', 'four>4']);
       assert.deepEqual(sensorCycle.pattern, ['one', 'two', 'three', 'four']);
@@ -186,6 +186,46 @@ describe('class SensorCycle', function() {
 
     });
 
+    it('Detects multiple ANALOG sensor changes during repetitive cycles', () => {
+      var cycles = [
+        ['C>0', 'D>12', 'X>1', 'a>0', 'b>0', 'L>7', 'R>0'],
+        ['C>0', 'D>12', 'X>1', 'a>0', 'b>0', 'L>8', 'R>0'],
+        ['C>0', 'D>5', 'X>1', 'a>0', 'b>0', 'L>7', 'R>0'],
+        ['C>0', 'D>4', 'X>1', 'a>0', 'b>0', 'L>7', 'R>0'],
+        ['C>0', 'D>13', 'X>1', 'a>0', 'b>0', 'L>7', 'R>0'],
+        ['C>0', 'D>12', 'X>1', 'a>0', 'b>0', 'L>3', 'R>0'],
+        ['C>0', 'D>12', 'X>1', 'a>0', 'b>0', 'L>7', 'R>0'],
+        ['C>0', 'D>12', 'X>1', 'a>0', 'b>0', 'L>7', 'R>0']
+      ], sensorCycle = new SensorCycle({ size: 64 }); // 64/16 = 4 items in history
+
+      var result = filterChanges(sensorCycle, cycles);
+
+      assert.compareObjects({
+        actual: result,
+        expected: [
+          {data: 'L>8', source: 'L', payload: '8', expected: 'L>7', deviation: 1, surprise: 1},
+          {data: 'D>5', source: 'D', payload: '5', expected: 'D>12', deviation: 1, surprise: 1},
+          {data: 'L>7', source: 'L', payload: '7', expected: 'L>8', deviation: 0.5, surprise: 1},
+          {data: 'D>4', source: 'D', payload: '4', expected: 'D>5', deviation: 1, surprise: 1},
+          {data: 'D>13', source: 'D', payload: '13', expected: 'D>4', deviation: 1, surprise: 1},
+          {data: 'D>12', source: 'D', payload: '12', expected: 'D>13', deviation: 0.125, surprise: 1},
+          {data: 'L>3', source: 'L', payload: '3', expected: 'L>7', deviation: 1, surprise: 1}
+        ],
+        ignore: ['deviation']
+      });
+
+      assert.around(result[0].deviation, 1);
+      assert.around(result[1].deviation, 1);
+      assert.around(result[2].deviation, 0.5);
+      assert.around(result[3].deviation, 1);
+      assert.around(result[4].deviation, 0.75);
+      assert.around(result[5].deviation, 0.625);
+      assert.around(result[6].deviation, 1);
+
+    });
+
+    //console.log('ARGS->', process.argv);
+
     describe('Performance', () => {
       var cycle = [ 'C>0', 'D>0', 'X>1', 'a>0', 'b>0', 'L>121', 'R>0', 'G>0'],
           sensorCycle,
@@ -220,10 +260,10 @@ describe('class SensorCycle', function() {
       }
 
       if (os.platform() === 'win32' && os.cpus()[0].speed > 2000) {
-        // Dev PC is 45 times faster and uses less ram
-        executeUpdates({ runs: 45 * 1000, secs: 5, limitMB: 30 });
-        executeUpdates({ runs: 45 * 5000, secs: 10, limitMB: 30 });
-        executeUpdates({ runs: 45 * 10000, secs: 15, limitMB: 30 });
+        // Dev PC is 50 times faster 
+        executeUpdates({ runs: 50 * 1000, secs: 5, limitMB: 30 });
+        executeUpdates({ runs: 50 * 5000, secs: 10, limitMB: 30 });
+        executeUpdates({ runs: 50 * 10000, secs: 15, limitMB: 30 });
         //executeUpdates({ runs: 45 * 50000, secs: 60, limitMB: 30 });
       } else {
         executeUpdates({ runs: 1000, secs: 5, limitMB: 30 });

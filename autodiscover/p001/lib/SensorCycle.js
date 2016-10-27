@@ -7,7 +7,7 @@ class SensorCycle {
 
 		// Buffer contains raw data input
 		this.buffer = []; // raw data input
-		this.pattern = []; // looping array of sensor keys
+		this.pattern = []; // looping array of sensor keys (last is last)
 		this.history = {}; // indexed by sensor keys and contains array of payloads
 		this.patternExists = false;
 		this.options = options = options || {};
@@ -31,19 +31,20 @@ class SensorCycle {
 		}
 		var source = dataparts.shift();
 		var payload = dataparts.join('');
-		// History is hashed by source
-		// it contains payloads only (detects deviation in sensor input)
+		// History is hashed by source, it contains payloads only 
+		// (ie detects deviation in sensor input)
 		var history = this.history[source] = this.history[source] || [];
-		var expectedPayload = history[history.length - 1];
+		var expectedPayload = history[0];
 		if (expectedPayload === payload) {
 			deviation = 0;
-		} else if (expectedPayload === undefined){
+		} else if (expectedPayload === undefined) {
 			deviation = 1;
 		} else {
 			deviation = this.compare(payload, history);
 			if (deviation > 0.33) surprise = 1;
 		}
-		// Pattern contains sources only (detects cycle changes)
+		// Pattern contains sources only 
+		// (ie. detects cycle changes)
 		var expectedSource = this.patternExists ? this.pattern[0] : undefined;
 		if (this.patternExists && expectedSource !== source) {
 			// Sensor input intermittent
@@ -52,13 +53,20 @@ class SensorCycle {
 		}
 		var index = this.pattern.indexOf(source);
 		if (index !== -1) {
+			// Found a match in the pattern
+			// Make sure anything in front of it is removed
 			this.patternExists = true;
 			this.pattern.splice(0, index + 1);
 		}
-		// Append to history/pattern/buffer
+		// Pattern is appended to as the current
+		// source forms parts of it.
 		this.pattern.push(source);
-		history.push(payload);
-		while (history.length > options.historySize) { history.shift(); }
+		// History always contains last item at beginning
+		// this is to make it easier to regognize patterns
+		// when comparing histories of different lengths
+		history.unshift(payload); 
+		history.splice(options.historySize);
+		// Buffer is appended to and kept at required length
 		this.buffer.push(data);
 		while (this.buffer.length > options.bufferSize) {	this.buffer.shift(); }
 		// Save update result
@@ -96,20 +104,10 @@ class SensorCycle {
 		return deviation;
 	}
 
-	hash(str) {
-    var hash = 0;
-    if (str.length == 0) return hash;
-    for (var i = 0; i < str.length; i++) {
-        char = str.charCodeAt(i);
-        hash = ((hash<<5)-hash)+char;
-        hash = hash & hash; // Convert to 32bit integer
-    }
-    return hash;
-	}
-
 	clear() {
 		this.buffer = [];
 		this.pattern = [];
+		this.history = {};
 		delete this.lastUpdate;
 	}
 

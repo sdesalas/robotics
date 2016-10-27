@@ -144,14 +144,22 @@ class Nala extends Observable {
 		// If due to own action, is it as expected?
 		var source = cycle.lastUpdate.source;
 		var history = cycle.history[source];
-		console.log({
+		if (history && history.length) {
+			var pattern = new Pattern(cycle.history[source]);
+			pattern.source = source;
+			var input = this.memory.input[pattern.hash]
+			if (input && input.important) {
+				react(input);
+			}
+		}
+		/*console.log({
 			source: source,
 			history: history
-		})
+		})*/
 		return this;
 	}
 
-	react() {
+	react(input) {
 		// Ok we should do something now to avoid pain
 		return this;
 	}

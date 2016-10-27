@@ -36,7 +36,7 @@ assert.around = function (val, estimate, msg) {
     from = estimate * 0.9;
     to = estimate * 1.1;
   }
-  return assert.between(val, from, to, util.format('%s around %s', val.toFixed(2), estimate.toFixed(2)));
+  return assert.between(val, from, to, msg || util.format('%s around %s', val.toFixed(2), estimate.toFixed(2)));
 }
 
 assert.compareObjects = function (conditions) {

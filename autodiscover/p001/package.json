@@ -1,7 +1,7 @@
 {
-  "name": "nala2",
+  "name": "autodiscover-p001",
   "version": "1.0.0",
-  "description": "Non-deterministic Artifcial Learning Algorithm",
+  "description": "",
   "main": "index.js",
   "dependencies": {
     "commander": "^2.9.0",
@@ -13,7 +13,8 @@
   },
   "scripts": {
     "start": "node ./bin/nala > nala.log",
-    "test": "node ./node_modules/mocha/bin/mocha"
+    "test": "node ./node_modules/mocha/bin/mocha --invert --grep Performance",
+    "test:full": "node ./node_modules/mocha/bin/mocha"
   },
   "keywords": [
     "serial",

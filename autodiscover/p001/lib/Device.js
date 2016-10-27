@@ -34,7 +34,7 @@ class Device extends Observable {
 		console.debug('Device.prototype.connect()');
 		var device = this;
 		var connection = new SerialPort(this.port.comName, { parser: readline, baudRate: this.port.baudRate });
-		connection.on('data', data => this.emit('data', this.key + data));
+		connection.on('data', data => this.emit('data', this.key + data.slice(0,-1))); // Remove EOL
 		connection.on('open', function(error) {
 			if (error) {
 				var msg = util.format('Failed to open connection to %s. %s', device.id, error);
