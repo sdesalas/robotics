@@ -6,8 +6,8 @@
  * Simple bot that uses a Radio Frequency 
  * receiver (315Mhz) for control.
  */
-
-#include <VirtualWire.h>
+#include "VirtualWire.h"
+#include "Queue.h";
 
 const int W1_DIR = 4;
 const int W1_PWM = 5;
@@ -16,6 +16,8 @@ const int W2_DIR = 7;
 const int RF_RX_PIN = 16;
 const int LED_PIN = 8;
 unsigned long lastMessage = 0;
+struct Message { char dir; byte power; };
+Queue<Message> messages(16);
 
 void setup() {
   Serial.begin(9600);
@@ -39,13 +41,13 @@ void loop() {
   String comdata = "";
   uint8_t buf[VW_MAX_MESSAGE_LEN];
   uint8_t buflen = VW_MAX_MESSAGE_LEN;
-  char dir = '-';
-  byte power = 0;
 
   // Read incoming messages
   if(vw_get_message(buf, &buflen))
   {
     // Message with a good checksum received, dump HEX
+    char dir = '-';
+    byte power = 0;
     lastMessage = millis();
     for(int i = 0; i < buflen; ++i)
     {
@@ -61,45 +63,48 @@ void loop() {
       Serial.print(power);
       Serial.println("");
     }
+    while(power > 0) {
+      messages.push(Message({ dir, power-- }));
+    }
   }
 
-  switch(dir) {
-    case 'F':
-        digitalWrite(W1_DIR, HIGH);
-        analogWrite(W1_PWM, 0);
-        digitalWrite(W2_DIR, HIGH);
-        analogWrite(W2_PWM, 0);
-        delay(power * 150);
-      break;
-    case 'B':
-        digitalWrite(W1_DIR, LOW);
-        analogWrite(W1_PWM, 255);
-        digitalWrite(W2_DIR, LOW);
-        analogWrite(W2_PWM, 255);
-        delay(power * 50);
-      break;
-    case 'L':
-        digitalWrite(W1_DIR, HIGH);
-        analogWrite(W1_PWM, 0);
-        digitalWrite(W2_DIR, LOW);
-        analogWrite(W2_PWM, 255);
-        delay(power * 30);
-      break;
-    case 'R':
-        digitalWrite(W1_DIR, LOW);
-        analogWrite(W1_PWM, 255);
-        digitalWrite(W2_DIR, HIGH);
-        analogWrite(W2_PWM, 0);
-        delay(power * 30);
-      break;
-    default:
-        //if (millis() > lastMessage + 300) 
-        //{
+  if (messages.count() == 0) {
+    digitalWrite(W1_DIR, LOW);
+    analogWrite(W1_PWM, 0);
+    digitalWrite(W2_DIR, LOW);
+    analogWrite(W2_PWM, 0);
+  } else {
+    Message message = messages.pop();
+    switch(message.dir) {
+      case 'F':
+          digitalWrite(W1_DIR, HIGH);
+          analogWrite(W1_PWM, 0);
+          digitalWrite(W2_DIR, HIGH);
+          analogWrite(W2_PWM, 0);
+          delay(100);
+        break;
+      case 'B':
           digitalWrite(W1_DIR, LOW);
+          analogWrite(W1_PWM, 255);
+          digitalWrite(W2_DIR, LOW);
+          analogWrite(W2_PWM, 255);
+          delay(50);
+        break;
+      case 'L':
+          digitalWrite(W1_DIR, HIGH);
           analogWrite(W1_PWM, 0);
           digitalWrite(W2_DIR, LOW);
+          analogWrite(W2_PWM, 255);
+          delay(30);
+        break;
+      case 'R':
+          digitalWrite(W1_DIR, LOW);
+          analogWrite(W1_PWM, 255);
+          digitalWrite(W2_DIR, HIGH);
           analogWrite(W2_PWM, 0);
-        //}
-      break;
+          delay(30);
+        break;
+    }
   }
+  //
 }
