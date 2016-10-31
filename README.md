@@ -24,7 +24,7 @@ This one was built [using instructions](https://github.com/nodebotsau/simplebot)
 
 This was useful as it helped me understand that Bluetooth makes it really easy to abstract communication, once you get it going it works as if you had a USB cable connected. 
 
-Pity its so hard to setup in the first place, and that the connection is usually pretty flaky. I ended up using cheapie RF transmitter/receiver pairs instead.
+Pity its so hard to setup in the first place, and that the connection is usually pretty flakey. I ended up using cheapie RF transmitter/receiver pairs instead, which also improve the battery life.
 
 ## Simplebot v2 (RF Bot)
 
