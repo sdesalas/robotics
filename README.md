@@ -64,4 +64,10 @@ A pretty basic setup that allows me to capture environmental sensor data and fee
 
 I want the next guy I build to do stuff on his own. Aiming for amoeba-level intelligence.
 
+## Scooterbot
 
+![scooterbot.jpg](scooterbot.jpg)
+
+After giving up on Gluco-bot, I transferred the parts out to a new enclosure I bought. 
+
+This one was made of cardboard so it was easier to cut out the holes for the servo-motors and zip-tie them in place. I also added some cool-cat glasses and held them up with bluetack and a pair of magnets.
