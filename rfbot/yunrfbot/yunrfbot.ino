@@ -13,6 +13,7 @@ const int RF_RX_PIN = 8;
 const int SERVO_L = 6;
 const int SERVO_R = 3;
 const int LED_PIN = 13;
+const int BUZ_PIN = 5;
 unsigned long lastMessage = 0;
 
 void setup() {
@@ -61,6 +62,25 @@ void loop() {
     }
     
   }
+  else if (Serial1.available()) {
+    // Give Feedback
+    digitalWrite(LED_PIN, HIGH);
+    
+    String data = Serial1.readStringUntil('\n');
+    switch(data[0]) {
+      case 'F':
+      case 'B':
+      case 'L':
+      case 'R':
+        dir = data[0];
+        power = 8;
+        break;
+      case '!':
+        dir = data[0];
+        power = 253;
+        break;
+    }
+  }
 
   move(dir, power);
 }
@@ -107,6 +127,18 @@ void move(char dir, byte power) {
         analogWrite(SERVO_L, 0);
         analogWrite(SERVO_R, 10);
         delay(power * 30);
+      break;
+    case '!':
+        if (power == 253) { // Red
+          tone(BUZ_PIN, 600); delay(200);
+          tone(BUZ_PIN, 150); delay(300);
+          noTone(BUZ_PIN); delay(50);
+        } else {
+          tone(BUZ_PIN, 400); delay(100);
+          tone(BUZ_PIN, 700); delay(100);
+          tone(BUZ_PIN, 800); delay(200);
+          noTone(BUZ_PIN); delay(50);
+        }
       break;
     default:
         //if (millis() > lastMessage + 300) 
