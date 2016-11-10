@@ -8,6 +8,7 @@ const SerialPort = require('serialport');
 const readline = SerialPort.parsers.readline('\n');
 const Device = require('./lib/Device');
 const SensorCycle = require('./lib/SensorCycle');
+const Pattern = require('./lib/Pattern');
 
 class Nala extends Observable {
 
