@@ -3,7 +3,7 @@ var util = require('util');
 var assert = require('./assert-fuzzy');
 var Pattern = require('../lib/Pattern');
 
-describe.only('class Pattern', function() {
+describe('class Pattern', function() {
 
   it('new Pattern()', function() {
     assert.equal(typeof Pattern, 'function', 'Pattern is a function')
