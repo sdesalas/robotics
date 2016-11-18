@@ -5,7 +5,7 @@ const crypto = require('crypto');
 const Observable = require('events');
 const Device = require('./Device');
 const SerialPort = require('serialport');
-const Nala = require('../');
+const Mind = require('../');
 
 const DEFAULT_MANUFACTURERS = /(wch)|(arduino)|(1a86)/;
 const DEFAULT_BAUDRATE = 115200;
@@ -99,7 +99,7 @@ class DeviceManager extends Observable {
 
 	// Controller device no longer needed
 	remove(deviceId, reason) {
-		console.debug('Nala.prototype.remove()', deviceId, reason);
+		console.debug('DeviceManager.prototype.remove()', deviceId, reason);
 		var device = this.devices[deviceId];
 		if (device) {
 			delete this.devices[deviceId];

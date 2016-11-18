@@ -2,7 +2,7 @@
 const fs = require('fs');
 const util = require('util');
 const program = require('commander');
-var Nala = require('../');
+const Mind = require('../');
 
 // options
 program
@@ -20,7 +20,7 @@ function log() {
 }
 
 // start
-var nala = new Nala({ 
+var mind = new Mind({ 
     debug: program.debug,
     listeners: {
         ready: function(devices) {

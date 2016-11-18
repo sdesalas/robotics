@@ -4,17 +4,17 @@ const fs = require('fs');
 const util = require('util');
 const Observable = require('events');
 const SensorCycle = require('./lib/SensorCycle');
-const ReactiveMind = require('./lib/ReactiveMind');
+const ReactionManager = require('./lib/ReactionManager');
 const DeviceManager = require('./lib/DeviceManager');
 
 const DEFAULT_DATAPATH = './data';
 const DEFAULT_DELIMITER = '>';
 const DEFAULT_MEMSIZE = 256;
 
-class Nala extends Observable {
+class Mind extends Observable {
 
 	constructor(options) {
-		console.debug('new Nala()', options);
+		console.debug('new Mind()', options);
 		super();
 		options = options || {};
 		options.dataPath = options.dataPath || DEFAULT_DATAPATH;
@@ -27,14 +27,14 @@ class Nala extends Observable {
 			}
 		}
 		// Internal fields
-		Nala.debugMode = options.debug;
+		Mind.debugMode = options.debug;
 		this.devices = {};
 		this.options = options;
 	}
 
 	// YAWN! Time to wake up!
 	wakeUp() {
-		console.debug('Nala.prototype.wakeUp()', this.options);
+		console.debug('Mind.prototype.wakeUp()', this.options);
 		var options = this.options;
 		this.cycle = new SensorCycle({ 
 			size: options.memSize,
@@ -53,7 +53,7 @@ class Nala extends Observable {
 				'data': this.emit.bind(this, 'data'),
 			}
 		});
-		this.reactiveMind = new ReactiveMind({
+		this.reactionManager = new ReactionManager({
 			dataPath: options.dataPath,
 			delimiter: options.delimiter
 		});
@@ -84,13 +84,13 @@ class Nala extends Observable {
 	// Aggregated incoming data pipeline for all the sensors.
 	// This gets called pretty frequently so should be optimised!
 	data(data) {
-		console.debug('Nala.prototype.data()', data);
+		console.debug('Mind.prototype.data()', data);
 		var update = this.cycle.update(data).lastUpdate;
 		if (update && update.surprise) { 
 			// Surprise ===> Change in input cycle.
 			// Do we have history to match on?
-			// Let the reactive mind determine if we should do something.
-			var action = this.reactiveMind.interpret(update.history, update.source);
+			// Let the reaction manager determine if we should do something.
+			var action = this.reactionManager.interpret(update.history, update.source);
 			if (action) {
 				this.perform(action);
 			}
@@ -104,7 +104,7 @@ class Nala extends Observable {
 	// this.perform("mf.r>1"); 		//--> {device: "mf", vpin: "r", data: "1" } // Turns on Red LED
 	// this.perform("yA.b>&a|63"); 	//--> {device: "yA", vpin: "b", data: "&a|63" } // Runs 2 tones on buzzer
 	perform(action) {
-		console.debug('Nala.prototype.perform()', action);
+		console.debug('Mind.prototype.perform()', action);
 		var delimiter = this.options.delimiter;
 		if (action && action.indexOf(delimiter)) {
 			// Find device & write to it
@@ -119,9 +119,9 @@ class Nala extends Observable {
 
 
 console.debug = function() {
-	if (Nala.debugMode) {
+	if (Mind.debugMode) {
 		console.log.apply(console, arguments);
 	}
 }
 
-module.exports = Nala;
+module.exports = Mind;

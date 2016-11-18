@@ -1,1 +1,0 @@
-node nala > nala.log

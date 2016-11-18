@@ -7,7 +7,7 @@ const crypto = require('crypto');
 const Observable = require('events');
 const SerialPort = require('serialport');
 const readline = SerialPort.parsers.readline('\n');
-const Nala = require('../');
+const Mind = require('../');
 
 class Device extends Observable {
 

@@ -3,13 +3,13 @@
 const fs = require('fs');
 const Pattern = require('./Pattern');
 const Utils = require('./Utils');
-const Nala = require('../');
+const Mind = require('../');
 
 // 
 // Manages the relationships between inputs and outputs
 // learning from positive and negative experiences.
 // 
-class ReactiveMind {
+class ReactionManager {
 
 	constructor(options) {
 		options = options || {};
@@ -24,7 +24,7 @@ class ReactiveMind {
 	}
 
 	interpret(history, source) {
-		console.debug('ReactiveMind.prototype.interpret()', source, history.length);
+		console.debug('ReactionManager.prototype.interpret()', source, history.length);
 		// Was change in pattern due to own action?
 		// If due to own action, is it as expected?
 		var input, match, id, attempts = 10;
@@ -60,7 +60,7 @@ class ReactiveMind {
 	}
 
 	reaction(input) {
-		console.debug('ReactiveMind.prototype.react(input)', input && input.id);
+		console.debug('ReactionManager.prototype.react(input)', input && input.id);
 		// Avoid pain and seek pleasure (maximise affinity of reaction)
 		// factor in some randomness
 		var output, reaction, reactions;
@@ -140,5 +140,5 @@ class ReactiveMind {
 }
 
 if (typeof module !== 'undefined') {
-  module.exports = ReactiveMind;
+  module.exports = ReactionManager;
 }

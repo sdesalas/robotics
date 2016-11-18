@@ -1,6 +1,6 @@
 "use strict";
 
-const Nala = require('../')
+const Mind = require('../')
 
 //
 // Manages the sensor cycle and detects pattern changes
