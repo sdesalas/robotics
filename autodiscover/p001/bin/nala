@@ -23,14 +23,17 @@ function log() {
 var nala = new Nala({ 
     debug: program.debug,
     listeners: {
+        ready: function(devices) {
+            log('I am awake and have %d peripheral device/s.', devices);
+        },
         deviceready: function(id, path) {
             log('Device "%s" connected. Data path: %s', id, path);
         },
-        awake: function(devices) {
-            log('I am awake and have %d peripheral device/s.', devices);
-        },
         deviceremoved: function(id, message) {
             log('Device "%s" has been removed. %s', id, message);
+        },
+        offline: function() {
+            log('Offline. No devices connected.');
         }
     }
 }).wakeUp();

@@ -1,8 +1,12 @@
 "use strict";
 
-const fs = require('fs');
-
 class Pattern extends Array {
+
+  static load(array) {
+    var pattern = new Pattern();
+    pattern.push.apply(pattern, array);
+    return pattern;
+  }
 
   // fast 32-bit hash code (ie 'b3a801a')
   get hash() {
@@ -22,7 +26,35 @@ class Pattern extends Array {
     return hash;
   }
 
-  // Mutates pattern (factor between 0 and 1)
+  // vector-based encoding algorithm
+  // used to match patterns based on (x,y) direction
+  //
+  // ie, these are much the same
+  // -> new Pattern(6,8,12,12,12,12,12,12,12).vectorCode === 12540
+  // -> new Pattern(6,12,12,12,12,12,12,12,12).vectorCode === 12540
+  // -> new Pattern(6,7,9,12,12,12,12,12,12).vectorCode === 12540
+  //
+  // however when vector changes it magnifies ripple
+  // -> new Pattern(6,12,12,9,12,12,12,12,12).vectorCode === 37614
+  //
+  // and yet the ripple can occur elsewhere and end up the same
+  // -> new Pattern(6,12,12,12,12,9,12,12,12).vectorCode === 37614
+  // 
+  get vectorCode() {
+    var getCode = (item) => String(item).split('').reduce((val, chr) => (val << 8) + chr.charCodeAt(0), 0);
+    var lastValue = getCode(this.slice().pop());
+    return this.reduceRight((accum, item, index) => {
+      var value = getCode(item),
+          diff = Math.abs(lastValue - value);
+      lastValue = value;
+      return accum + diff;
+    }, 0);
+  }
+
+  // Mutates pattern (by factor between 0 and 1)
+  //
+  // This creates a new pattern with random differences
+  //
   mutate(factor) {
     factor = (factor >= 0 && factor <= 1) ? factor : 0.1;
     var pattern = new Pattern();

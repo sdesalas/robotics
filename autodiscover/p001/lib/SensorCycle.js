@@ -1,14 +1,19 @@
 "use strict";
 
+const Nala = require('../')
+
+//
+// Manages the sensor cycle and detects pattern changes
+//
 class SensorCycle {
 
 	constructor(options) {
 		//super();
-
+		console.debug('new SensorCycle()');
 		// Buffer contains raw data input
 		this.buffer = []; // raw data input
-		this.pattern = []; // looping array of sensor keys (last is last)
-		this.history = {}; // indexed by sensor keys and contains array of payloads
+		this.pattern = []; // looping array of sensor ids (last is last)
+		this.history = {}; // indexed by sensor ids and contains array of payloads
 		this.patternExists = false;
 		this.options = options = options || {};
 		this.options.bufferSize = (options.size || 256) / 8;
@@ -75,6 +80,7 @@ class SensorCycle {
 			source: source,
 			payload: payload,
 			expected: expectedSource ? [expectedSource, options.delimiter, expectedPayload].join('') : undefined,
+			history: history,
 			deviation: deviation,
 			surprise: surprise
 		};

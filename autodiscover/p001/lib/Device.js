@@ -12,13 +12,17 @@ const Nala = require('../');
 class Device extends Observable {
 
 	// Initializes an attached microcontroller
-	constructor(port, id) {
+	constructor(options) {
 		super();
-		console.debug('new Device(port)', port.comName);
-		this.id = port.id;
-		this.key = port.key;
-		this.port = port;
-		this.dataPath = './data/' + this.id;
+		if (!options ||
+			!options.port ||
+			!options.dataPath) {
+			throw Error('Error initializing Device.');
+		}
+		console.debug('new Device(port)', options.port.comName);
+		this.port = options.port;
+		this.id = options.port.id;
+		this.dataPath = options.dataPath + '/' + this.id;
 		this.inputPath = this.dataPath + '/in';
 		this.outputPath = this.dataPath + '/out';
 		// Create dirs
@@ -34,7 +38,7 @@ class Device extends Observable {
 		console.debug('Device.prototype.connect()');
 		var device = this;
 		var connection = new SerialPort(this.port.comName, { parser: readline, baudRate: this.port.baudRate });
-		connection.on('data', data => this.emit('data', this.key + data.slice(0,-1))); // Remove EOL
+		connection.on('data', data => this.emit('data', this.id + '.' + data.slice(0,-1))); // Remove EOL
 		connection.on('open', function(error) {
 			if (error) {
 				var msg = util.format('Failed to open connection to %s. %s', device.id, error);
@@ -67,14 +71,8 @@ class Device extends Observable {
 			});
 		}
 	}
-
 }
 
-console.debug = function() {
-	if (Nala.debugMode) {
-		console.log.apply(console, arguments);
-	}
-}
 
 if (typeof module !== 'undefined') {
 	module.exports = Device;
