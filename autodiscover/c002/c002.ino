@@ -98,6 +98,7 @@ void interpret() {
           // Buzzer Example
           //
           batch = random(1, 5);
+          Serial.print('>');
           for (int i = 0; i < batch; i++) {
             if (i > 0) { Serial.print('|'); }
             Serial.write(random(0, 255));
@@ -112,6 +113,7 @@ void interpret() {
           // Red/Green LED Example
           //
           batch = random(1, 5);
+          Serial.print('>');
           for (int i = 0; i < batch; i++) {
             if (i > 0) { Serial.print('|'); }
             Serial.write(random(48, 50));

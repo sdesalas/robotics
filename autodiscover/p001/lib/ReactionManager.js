@@ -14,30 +14,26 @@ class ReactionManager {
 	constructor(options) {
 		options = options || {};
 		this.delimiter = options.delimiter || DEFAULT_DELIMITER;
+		this.devices = options.devices || {};
 		this.dataPath = options.dataPath;
+		this.memory = options.memory || {};
+		this.memory.inputs = {};
+		this.memory.outputs = {};
+		this.memory.reactions = [];
 		this.options = options;
-		this.memory = {
-			inputs: {},
-			outputs: {},
-			reactions: [],
-		};
 	}
 
 	interpret(history, source) {
 		console.debug('ReactionManager.prototype.interpret()', source, history.length);
 		// Was change in pattern due to own action?
 		// If due to own action, is it as expected?
-		var input, match, id, attempts = 10;
+		var input, output;
 		if (source && history instanceof Array) {
 			var pattern = Pattern.load(history);
 			var vectorCode = pattern.vectorCode;
 			var history = console.debug ? history.toString() : undefined;
-			id = source + this.delimiter + vectorCode;
-			match = this.memory.inputs[id];
-			// Input unknown? Try some variations
-			//while(!match && attempts--) {
-			//	match = this.memory.inputs[source + this.delimiter + pattern.mutate().vectorCode];
-			//}
+			var id = source + this.delimiter + vectorCode;
+			var match = this.memory.inputs[id];
 			if (match && match.related) {
 				// Add link to existing
 				if (match.history !== history && match.related.indexOf(history) < 0)
@@ -55,7 +51,10 @@ class ReactionManager {
 				};
 				this.memory.inputs[input.id] = input;
 			}
-			return this.reaction(match || input); // undefined = no reaction
+			output = this.reaction(match || input); // undefined = no reaction
+			if (output && output.cmd) {
+				return output.cmd;
+			}
 		}
 	}
 
@@ -92,8 +91,16 @@ class ReactionManager {
 		// Not reacting to input? 
 		// 	- Try something new
 		//	- Do nothing
-		if (Math.random() > 0.5) {
-			output = Utils.random(this.memory.outputs);
+		if (!output && Object.keys(this.devices).length && Math.random() > 0.5) {
+			var device = Utils.random(this.devices);
+			var command = device.randomCommand();
+			if (device && command) {
+				output = {
+					cmd: device.id + '.' + command,
+					reactions: []
+				}
+				this.memory.outputs[output.cmd] = output;
+			}
 			console.log('Output at random: ', output);
 		}
 		// Process relationships

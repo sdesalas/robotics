@@ -25,6 +25,7 @@ class DeviceManager extends Observable {
 		options = options || {};
 		options.baudRate = options.baudRate || DEFAULT_BAUDRATE;
 		options.manufacturers = options.manufacturers || DEFAULT_MANUFACTURERS;
+		options.delimiter = options.delimiter || DEFAULT_DELIMITER;
 		this.options = options;
 		this.devices = options.devices || {};
 		// Attach event listeners
@@ -87,10 +88,10 @@ class DeviceManager extends Observable {
 		var device = new Device({
 			port: port, 
 			dataPath: this.options.dataPath,
+			delimiter: this.options.delimiter,
 			index: Object.keys(this.devices).length
 		});
 		this.devices[device.id] = device;
-		fs.writeFileSync(device.dataPath + '/device.json', JSON.stringify(device, null, 2));
 		device.on('connected', this.emit.bind(this, 'deviceready', device.id, device.dataPath));
 		device.on('disconnect', this.remove.bind(this, device.id));
 		device.on('data', this.emit.bind(this, 'data'));

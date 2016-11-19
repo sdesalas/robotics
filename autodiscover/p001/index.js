@@ -5,6 +5,7 @@ const util = require('util');
 const Observable = require('events');
 const SensorCycle = require('./lib/SensorCycle');
 const ReactionManager = require('./lib/ReactionManager');
+const ReflectionManager = require('./lib/ReflectionManager');
 const DeviceManager = require('./lib/DeviceManager');
 
 const DEFAULT_DATAPATH = './data';
@@ -29,6 +30,7 @@ class Mind extends Observable {
 		// Internal fields
 		Mind.debugMode = options.debug;
 		this.devices = {};
+		this.memory = {};
 		this.options = options;
 	}
 
@@ -43,6 +45,7 @@ class Mind extends Observable {
 		this.deviceManager = new DeviceManager({
 			manufacturers: options.manufacturers,
 			baudRate: options.baudRate,
+			delimiter: options.delimiter,
 			devices: this.devices,
 			dataPath: './data',
 			listeners: {
@@ -54,7 +57,14 @@ class Mind extends Observable {
 			}
 		});
 		this.reactionManager = new ReactionManager({
+			memory: this.memory,
+			devices: this.devices,
 			dataPath: options.dataPath,
+			delimiter: options.delimiter
+		});
+		this.reflectionManager = new ReflectionManager({
+			memory: this.memory,
+			devices: this.devices,
 			delimiter: options.delimiter
 		});
 		this.on('data', this.data.bind(this));
@@ -64,21 +74,9 @@ class Mind extends Observable {
 
 	// Reflection loop
 	idle() {
-		this.reflect();
-		this.fulfill();
+		this.reflectionManager.reflect();
+		this.reflectionManager.fulfill();
 		setTimeout(this.idle.bind(this), 500);
-	}
-
-	reflect() {
-		// Match input to known patterns
-		// Query options for a device
-		// Query option for a device (if options known)
-	}
-
-	fulfill() {
-		// Curiosity: Trial option for a device
-		// Seek positive patterns / feedback.
-		// Needs: Charge battery, gain knowledge, approval
 	}
 
 	// Aggregated incoming data pipeline for all the sensors.
