@@ -24,10 +24,10 @@ class ReactionManager {
 	}
 
 	interpret(history, source) {
-		console.debug('ReactionManager.prototype.interpret()', source, history.length);
+		console.debug('ReactionManager.prototype.interpret()', source, history && history.length);
 		// Was change in pattern due to own action?
 		// If due to own action, is it as expected?
-		var input, output;
+		var match, input;
 		if (source && history instanceof Array) {
 			var pattern = Pattern.load(history);
 			var vectorCode = pattern.vectorCode;
@@ -51,11 +51,8 @@ class ReactionManager {
 				};
 				this.memory.inputs[input.id] = input;
 			}
-			output = this.reaction(match || input); // undefined = no reaction
-			if (output && output.cmd) {
-				return output.cmd;
-			}
 		}
+		return match || input; // undefined => no match
 	}
 
 	reaction(input) {

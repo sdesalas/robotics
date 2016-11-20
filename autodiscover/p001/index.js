@@ -68,6 +68,8 @@ class Mind extends Observable {
 			delimiter: options.delimiter
 		});
 		this.on('data', this.data.bind(this));
+		this.on('surprise', this.react.bind(this));
+		this.reflectionManager.on('react', this.react.bind(this));
 		this.idle();
 		return this;
 	}
@@ -85,15 +87,21 @@ class Mind extends Observable {
 		console.debug('Mind.prototype.data()', data);
 		var update = this.cycle.update(data).lastUpdate;
 		if (update && update.surprise) { 
-			// Surprise ===> Change in input cycle.
-			// Do we have history to match on?
-			// Let the reaction manager determine if we should do something.
-			var action = this.reactionManager.interpret(update.history, update.source);
-			if (action) {
-				this.perform(action);
-			}
+			this.emit('surprise', update);
 		}
 		return this;
+	}
+
+	// Surprise ===> Change in input cycle.
+	// Let the reaction manager determine if we should do something.
+	react(update) {
+		console.debug('Mind.prototype.react()', update);
+		update = update || {};
+		var match = this.reactionManager.interpret(update.history, update.source);
+		var output = this.reactionManager.reaction(match); // undefined = no reaction
+		if (output && output.cmd) {
+			this.perform(output.cmd);
+		}
 	}
 
 	// An action is a string that contains information about
@@ -102,14 +110,14 @@ class Mind extends Observable {
 	// this.perform("mf.r>1"); 		//--> {device: "mf", vpin: "r", data: "1" } // Turns on Red LED
 	// this.perform("yA.b>&a|63"); 	//--> {device: "yA", vpin: "b", data: "&a|63" } // Runs 2 tones on buzzer
 	perform(action) {
-		console.debug('Mind.prototype.perform()', action);
+		console.warn('Mind.prototype.perform()', action);
 		var delimiter = this.options.delimiter;
 		if (action && action.indexOf(delimiter)) {
 			// Find device & write to it
-			var device = Object.keys(this.devices).filter(id => action.indexOf(id) === 0).pop();
-			if (device) {
-				//device.write(action.substr(3));
-				console.log('device.write()', action.substr(3));
+			var deviceId = Object.keys(this.devices).filter(id => action.indexOf(id) === 0).pop();
+			if (deviceId) {
+				this.devices[deviceId].write(action.substr(3));
+				//console.log('device.write()', action.substr(3));
 			}
 		}
 	}

@@ -22,6 +22,8 @@ Queue<Tone> tones = Queue<Tone>(32);
 Queue<Flash> reds = Queue<Flash>(32);
 Queue<Flash> greens = Queue<Flash>(32);
 int currentPitch;
+char delimiter = '>';
+char delimiter2 = '|';
 
 // Inputs
 int LIGHT = A5;
@@ -76,7 +78,7 @@ void interpret() {
   if (command_length < 1) return;
   Serial.print(command);
   randomSeed(micros());
-  short pos; byte batch; byte value; byte duration;
+  short pos; byte batch; int value; byte duration;
   long due; // When is the command due? used to process batches.
   Flash switch_off; Tone go_quiet;
   switch(command[0]) {
@@ -86,7 +88,8 @@ void interpret() {
       // Help - List Available commands
       //
       if (command_length < 3) {
-        Serial.println(">B|R|G");
+        Serial.print(delimiter);
+        Serial.println("B|R|G");
         return;
       };
 
@@ -97,14 +100,15 @@ void interpret() {
           //
           // Buzzer Example
           //
-          batch = random(1, 5);
-          Serial.print('>');
+          batch = random(1, 5); 
+          Serial.print(delimiter);
           for (int i = 0; i < batch; i++) {
-            if (i > 0) { Serial.print('|'); }
-            Serial.write(random(0, 255));
-            Serial.write(random(0, 255));
+            if (i > 0) { Serial.print(delimiter2); }
+            Serial.write(b2c64(random(0, 63))); //--> base64 tone (part 1)
+            Serial.write(b2c64(random(0, 63))); //--> base64 tone (part 2)
+            Serial.write(b2c64(randomLHS(0, 63))); //--> base64 duration
           }
-          Serial.println(); 
+          Serial.println();
           return;
 
         case 'R':
@@ -112,12 +116,12 @@ void interpret() {
           // 
           // Red/Green LED Example
           //
-          batch = random(1, 5);
-          Serial.print('>');
+          batch = randomLHS(1, 5); // 1-5 (left-leaning distribution)
+          Serial.print(delimiter);
           for (int i = 0; i < batch; i++) {
-            if (i > 0) { Serial.print('|'); }
-            Serial.write(random(48, 50));
-            Serial.write(random(0, 255));
+            if (i > 0) { Serial.print(delimiter2); }
+            Serial.write(random(48, 50)); // '0' or '1' --> on/off
+            Serial.write(b2c64(random(0, 63))); //--> base64 duration
           }
           Serial.println(); 
           return;
@@ -128,21 +132,21 @@ void interpret() {
       // 
       // Buzzer HAL
       // 
-      // See example: note that `tone` is in Hz. `duration` is 0-255 x16 milliseconds (ie max 4096ms)
+      // See example: note that `tone` 0-4095 (hertz with left-leaning mod). `duration` is 0-63 x64 milliseconds (ie max 4sec)
       //
-      // B:u4|;0 // ie. B:[byte `tone`][byte `duration`]|[byte `tone`][byte `duration`]|...
+      // "B>ux4|aB0" // ie. B>[byte `tone`][byte `tone`][byte `duration`]|[byte `tone`][byte `tone`][byte `duration`]|...
       //
-      if (command_length < 3) return;
+      if (command_length < 4) return;
       tones.clear();
       due = millis();
       pos = 2;
-      while(pos < command_length) {
-        value = command[pos++];
-        duration = (command_length == pos) ? 255 : command[pos]; // Max if undefined
-        Tone segment = { due, value * 16, duration * 16};
+      while(pos+1 < command_length) {
+        value = (c2b64(command[pos++]) << 6) | c2b64(command[pos++]); // tone byte 1 + byte 2
+        duration = command_length == pos ? 63 : c2b64(command[pos++]); // Max if undefined
+        Tone segment = { due, n2tone(value), duration * 64};
         tones.push(segment);
         due = due + segment.duration;
-        pos++; // separator (|)
+        pos++; // skip separator (|)
       }
       go_quiet = { due, 0, 1 };
       tones.push(go_quiet);
@@ -154,9 +158,9 @@ void interpret() {
       // 
       // Red/Green LED HAL
       //
-      // See example: note that `duration` is 0-255 x16 milliseconds (ie max 4096ms)
+      // See example: note that `duration` is 0-63 x64 milliseconds (ie max 4sec)
       //
-      // R:1y|0G|1n // ie. R:[0/1][byte duration]|[0/1][byte duration]|...
+      // "R>1y|0G|1n" // ie. R>[0/1][byte duration]|[0/1][byte duration]|...
       //
       if (command_length < 3) return;
       ((command[0] == 'G') ? greens : reds).clear();
@@ -164,11 +168,11 @@ void interpret() {
       pos = 2;
       while(pos < command_length) {
         value = command[pos++] != 48;
-        duration = (command_length == pos) ? 255 : command[pos]; // Max if undefined
-        Flash flash = { due, value, duration * 16};
+        duration = command_length == pos ? 63 : c2b64(command[pos++]); // Max if undefined
+        Flash flash = { due, value, duration * 64};
         ((command[0] == 'G') ? greens : reds).push(flash);
         due = due + flash.duration;
-        pos++; // separator (|)
+        pos++; // skip separator (|)
       }
       switch_off = { due, 0, 0 };
       ((command[0] == 'G') ? greens : reds).push(switch_off); // Turn off when finished
@@ -215,15 +219,20 @@ void act() {
 
 void sense() {
   // Light Sensor
-  Serial.print("g>");
+  Serial.print('G'); 
+  Serial.print(delimiter);
   Serial.println(digitalRead(LED_G));
-  Serial.print("l>");
+  Serial.print('L');
+  Serial.print(delimiter);
   Serial.println(map(analogRead(LIGHT), 0, 1023, 0, 15));
-  Serial.print("r>");
+  Serial.print('R');
+  Serial.print(delimiter);
   Serial.println(digitalRead(LED_R));
-  Serial.print("b>");
+  Serial.print('B');
+  Serial.print(delimiter);
   Serial.println(currentPitch);
-  Serial.print("w>");
+  Serial.print('W');
+  Serial.print(delimiter);
   Serial.println(getRFMessage());
 }
 
@@ -251,6 +260,21 @@ String getRFMessage() {
   }
   
   return output;
+}
+
+// Convert number to tone
+// biases output towards lower herz ranges (ie voice)
+int n2tone(int n) { return floor(pow(constrain(n, 0, 4095) / 64.0, 2)); }
+//int n2tone(int n) { return (n < 1024) n : 1024 + (n - 1024) * pow(n/1024.0, 1.2); }
+
+// Base64 encoding/decoding
+String base64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+byte c2b64(char chr) { return constrain(base64.indexOf(chr), 0, 63); }
+char b2c64(byte num) { return base64[constrain(num, 0, 63)]; }
+
+// Left-side leaning random number
+int randomLHS(int from, int to) { 
+    return floor((pow(random(0, ((to - from) * 10) + 1) / 10.0, 1.6) / to) + from);
 }
 
 // Function that printf and related will use to print

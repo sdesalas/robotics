@@ -1,6 +1,7 @@
 "use strict";
 
 const fs = require('fs');
+const Observable = require('events');
 const Pattern = require('./Pattern');
 const Utils = require('./Utils');
 const Mind = require('../');
@@ -8,11 +9,11 @@ const Mind = require('../');
 // 
 // Queries devices and revises memory.
 // 
-class ReflectionManager {
+class ReflectionManager extends Observable {
 
 	constructor(options) {
 		console.log('new ReflectionManager()');
-		//super();
+		super();
 		options = options || {};
 		this.memory = options.memory || {};
 		this.devices = options.devices || {};
@@ -59,6 +60,11 @@ class ReflectionManager {
 		// Curiosity: Trial option for a device
 		// Seek positive patterns / feedback.
 		// Needs: Charge battery, gain knowledge, approval
+		var random = Utils.random(100);
+		if (random < 5) {
+			// Lets just try something new..
+			this.emit('react');
+		}
 	}
 
 }

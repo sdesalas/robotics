@@ -113,6 +113,8 @@ class Device extends Observable {
 				console.debug('Device.prototype.data().help().action()', action);
 				if (available && available.indexOf(action) === -1) {
 					available.push(action);
+					//available.push(new Buffer(action));
+					//available.push(action.split('').map(chr => chr.charCodeAt(0) & 255));
 				}
 			}
 			fs.writeFile(this.dataPath + '/device.json', JSON.stringify(this, null, 2));
