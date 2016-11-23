@@ -21,7 +21,7 @@ class SensorCycle {
 		this.options.delimiter = options.delimiter || '>';
 		// Initialize
 		if (options.data) {
-				options.data.forEach(this.update.bind(this));
+			options.data.forEach(this.update.bind(this));
 		}
 	}
 

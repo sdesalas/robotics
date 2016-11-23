@@ -18,6 +18,12 @@ class ReflectionManager extends Observable {
 		this.memory = options.memory || {};
 		this.devices = options.devices || {};
 		this.delimiter = options.delimiter || DEFAULT_DELIMITER;
+		// Attach event listeners
+		if (options.listeners) {
+			for(var event in options.listeners) {
+				this.on(event, options.listeners[event]);
+			}
+		}
 	}
 
 	reflect() {
@@ -63,7 +69,7 @@ class ReflectionManager extends Observable {
 		var random = Utils.random(100);
 		if (random < 5) {
 			// Lets just try something new..
-			this.emit('react');
+			this.emit('experiment');
 		}
 	}
 

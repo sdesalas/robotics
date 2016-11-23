@@ -4,7 +4,7 @@ const fs = require('fs');
 const util = require('util');
 const Observable = require('events');
 const SensorCycle = require('./lib/SensorCycle');
-const ReactionManager = require('./lib/ReactionManager');
+const Conditioning = require('./lib/Conditioning');
 const ReflectionManager = require('./lib/ReflectionManager');
 const DeviceManager = require('./lib/DeviceManager');
 
@@ -34,13 +34,20 @@ class Mind extends Observable {
 		this.options = options;
 	}
 
+	static get delimiter() {
+		return DEFAULT_DELIMITER;
+	}
+
 	// YAWN! Time to wake up!
 	wakeUp() {
 		console.debug('Mind.prototype.wakeUp()', this.options);
 		var options = this.options;
 		this.cycle = new SensorCycle({ 
 			size: options.memSize,
-			delimiter: options.delimiter
+			delimiter: options.delimiter,
+			listeners: {
+				'surprise': this.emit.bind(this, 'surprise')
+			}
 		});
 		this.deviceManager = new DeviceManager({
 			manufacturers: options.manufacturers,
@@ -56,20 +63,26 @@ class Mind extends Observable {
 				'data': this.emit.bind(this, 'data'),
 			}
 		});
-		this.reactionManager = new ReactionManager({
+		this.conditioning = new Conditioning({
 			memory: this.memory,
 			devices: this.devices,
 			dataPath: options.dataPath,
-			delimiter: options.delimiter
+			delimiter: options.delimiter,
+			listeners: {
+				'action': this.emit.bind(this, 'action')
+			}
 		});
 		this.reflectionManager = new ReflectionManager({
 			memory: this.memory,
 			devices: this.devices,
-			delimiter: options.delimiter
+			delimiter: options.delimiter,
+			listeners: {
+				'experiment': this.conditioning.experiment.bind(this.conditioning)
+			}
 		});
 		this.on('data', this.data.bind(this));
-		this.on('surprise', this.react.bind(this));
-		this.reflectionManager.on('react', this.react.bind(this));
+		this.on('surprise', this.conditioning.surprise.bind(this.conditioning));
+		this.on('action', this.action.bind(this));
 		this.idle();
 		return this;
 	}
@@ -92,25 +105,13 @@ class Mind extends Observable {
 		return this;
 	}
 
-	// Surprise ===> Change in input cycle.
-	// Let the reaction manager determine if we should do something.
-	react(update) {
-		console.debug('Mind.prototype.react()', update);
-		update = update || {};
-		var match = this.reactionManager.interpret(update.history, update.source);
-		var output = this.reactionManager.reaction(match); // undefined = no reaction
-		if (output && output.cmd) {
-			this.perform(output.cmd);
-		}
-	}
-
 	// An action is a string that contains information about
 	// the device, virtual pin (actuator), and data to send to it
 	// for example:
-	// this.perform("mf.r>1"); 		//--> {device: "mf", vpin: "r", data: "1" } // Turns on Red LED
-	// this.perform("yA.b>&a|63"); 	//--> {device: "yA", vpin: "b", data: "&a|63" } // Runs 2 tones on buzzer
-	perform(action) {
-		console.warn('Mind.prototype.perform()', action);
+	// this.action("mf.r>1"); 		//--> {device: "mf", vpin: "r", data: "1" } // Turns on Red LED
+	// this.action("yA.b>&a|63"); 	//--> {device: "yA", vpin: "b", data: "&a|63" } // Runs 2 tones on buzzer
+	action(action) {
+		console.warn('Mind.prototype.action()', action);
 		var delimiter = this.options.delimiter;
 		if (action && action.indexOf(delimiter)) {
 			// Find device & write to it
@@ -130,4 +131,8 @@ console.debug = function() {
 	}
 }
 
-module.exports = Mind;
+
+if (typeof module !== 'undefined') {
+	module.exports = Mind;
+}
+

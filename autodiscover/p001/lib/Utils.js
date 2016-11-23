@@ -27,6 +27,14 @@ class Utils {
 		}
 	}
 
+	// Left-side leaning random number (closer to from than to)
+	static randomLHS(from, to, affinity) {
+		var random = Math.random() * (to - from),
+			result = (Math.pow(random, 2) / to) + from;
+		if (to < 2) return result;
+		return Math.floor(result);
+	}
+
 	static timestamp() {
 		return new Date().getTime();
 	}
