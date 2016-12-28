@@ -2,15 +2,14 @@
 
 const fs = require('fs');
 const util = require('util');
+const config = require('./config');
 const Observable = require('events');
+const Pattern = require('./lib/Pattern');
 const SensorCycle = require('./lib/SensorCycle');
 const Conditioning = require('./lib/Conditioning');
 const ReflectionManager = require('./lib/ReflectionManager');
 const DeviceManager = require('./lib/DeviceManager');
-
-const DEFAULT_DATAPATH = './data';
-const DEFAULT_DELIMITER = '>';
-const DEFAULT_MEMSIZE = 256;
+const Api = require('./lib/Api');
 
 class Mind extends Observable {
 
@@ -18,9 +17,10 @@ class Mind extends Observable {
 		console.debug('new Mind()', options);
 		super();
 		options = options || {};
-		options.dataPath = options.dataPath || DEFAULT_DATAPATH;
-		options.delimiter = options.delimiter || DEFAULT_DELIMITER;
-		options.memSize = options.memSize || DEFAULT_MEMSIZE;
+		options.dataPath = options.dataPath || config.DATA_PATH;
+		options.delimiterIn = options.delimiterIn || config.DELIMITER_IN;
+		options.delimiterOut = options.delimiterOut || config.DELIMITER_OUT;
+		options.memSize = options.memSize || config.MEMSIZE;
 		// Attach event listeners
 		if (options.listeners) {
 			for(var event in options.listeners) {
@@ -34,17 +34,13 @@ class Mind extends Observable {
 		this.options = options;
 	}
 
-	static get delimiter() {
-		return DEFAULT_DELIMITER;
-	}
-
 	// YAWN! Time to wake up!
 	wakeUp() {
 		console.debug('Mind.prototype.wakeUp()', this.options);
 		var options = this.options;
 		this.cycle = new SensorCycle({ 
 			size: options.memSize,
-			delimiter: options.delimiter,
+			delimiterOut: options.delimiterOut,
 			listeners: {
 				'surprise': this.emit.bind(this, 'surprise')
 			}
@@ -52,7 +48,8 @@ class Mind extends Observable {
 		this.deviceManager = new DeviceManager({
 			manufacturers: options.manufacturers,
 			baudRate: options.baudRate,
-			delimiter: options.delimiter,
+			delimiterIn: options.delimiterIn,
+			delimiterOut: options.delimiterOut,
 			devices: this.devices,
 			dataPath: './data',
 			listeners: {
@@ -67,7 +64,6 @@ class Mind extends Observable {
 			memory: this.memory,
 			devices: this.devices,
 			dataPath: options.dataPath,
-			delimiter: options.delimiter,
 			listeners: {
 				'action': this.emit.bind(this, 'action')
 			}
@@ -75,10 +71,13 @@ class Mind extends Observable {
 		this.reflectionManager = new ReflectionManager({
 			memory: this.memory,
 			devices: this.devices,
-			delimiter: options.delimiter,
+			delimiterIn: options.delimiterIn,
 			listeners: {
-				'experiment': this.conditioning.experiment.bind(this.conditioning)
+				'action': this.emit.bind(this, 'action')
 			}
+		});
+		this.api = new Api({
+			state: this
 		});
 		this.on('data', this.data.bind(this));
 		this.on('surprise', this.conditioning.surprise.bind(this.conditioning));
@@ -98,9 +97,13 @@ class Mind extends Observable {
 	// This gets called pretty frequently so should be optimised!
 	data(data) {
 		console.debug('Mind.prototype.data()', data);
-		var update = this.cycle.update(data).lastUpdate;
-		if (update && update.surprise) { 
-			this.emit('surprise', update);
+		if (data.indexOf(this.options.delimiterOut) !== -1) {
+			var update = this.cycle.update(data).lastUpdate;
+			if (update && update.surprise) { 
+				var pattern = Pattern.generate(update.history);
+				var input = update.source + this.options.delimiterOut + pattern.vectorCode;
+				this.emit('surprise', input, update);
+			}
 		}
 		return this;
 	}
@@ -108,12 +111,12 @@ class Mind extends Observable {
 	// An action is a string that contains information about
 	// the device, virtual pin (actuator), and data to send to it
 	// for example:
-	// this.action("mf.r>1"); 		//--> {device: "mf", vpin: "r", data: "1" } // Turns on Red LED
-	// this.action("yA.b>&a|63"); 	//--> {device: "yA", vpin: "b", data: "&a|63" } // Runs 2 tones on buzzer
+	// this.action("mf.r<1"); 		//--> {device: "mf", vpin: "r", data: "1" } // Turns on Red LED
+	// this.action("yA.b<&a|63"); 	//--> {device: "yA", vpin: "b", data: "&a|63" } // Runs 2 tones on buzzer
 	action(action) {
 		console.warn('Mind.prototype.action()', action);
-		var delimiter = this.options.delimiter;
-		if (action && action.indexOf(delimiter)) {
+		var delimiterIn = this.options.delimiterIn;
+		if (action && action.indexOf(delimiterIn)) {
 			// Find device & write to it
 			var deviceId = Object.keys(this.devices).filter(id => action.indexOf(id) === 0).pop();
 			if (deviceId) {
@@ -123,7 +126,6 @@ class Mind extends Observable {
 		}
 	}
 }
-
 
 console.debug = function() {
 	if (Mind.debugMode) {

@@ -1,6 +1,7 @@
 "use strict";
 
 const fs = require('fs');
+const fusspot = require('fusspot');
 const Observable = require('events');
 const Association = require('./Association');
 const Pattern = require('./Pattern');
@@ -16,15 +17,13 @@ class Conditioning extends Observable {
 	constructor(options) {
 		super();
 		options = options || {};
-		this.delimiter = options.delimiter || Mind.delimiter;
 		this.devices = options.devices || {};
 		this.dataPath = options.dataPath;
 		this.memory = options.memory || {};
 		this.memory.actions = {};
-		this.memory.reactions = this.memory.reactions || {};
-		this.memory.consequences = this.memory.consequences || {};
-		this.reactions = new Association(this.memory.reactions, this.delimiter);
-		this.consequences = new Association(this.memory.consequences, this.delimiter);
+		this.memory.vectors = {};
+		this.memory.reactions = new fusspot.Grid();
+		this.memory.consequences = new fusspot.Grid({ adaptive: false });
 		this.options = options;
 		// Attach event listeners
 		if (options.listeners) {
@@ -40,92 +39,51 @@ class Conditioning extends Observable {
 	// Was change in pattern due to own action?
 	// If due to own action, is it as expected?
 	// Otherwise determine if we should do something.
-	surprise(update) {
-		console.debug('Conditioning.prototype.surprise()', update);
+	surprise(input, update) {
 		update = update || {};
-		var history = update.history;
+		console.debug('Conditioning.prototype.surprise()', input, update.source);
 		var source = update.source;
-		if (source && history) {
-			var pattern = Pattern.load(history);
-			if (!this.isExpected(pattern, source)) {
-				var output = this.getReaction(pattern, source);
-				if (output && output.cmd) {
-					this.emit('action', output.cmd);
-				}
-				this.save();
+		var grid = this.memory.reactions;
+		var vectorCode = Pattern.generate(update.history).vectorCode;
+		var vector = this.memory.vectors[input] = this.memory.vectors[input] || {};
+		vector[new Date().getTime()] = update.history.join();
+		if (!this.isExpected(input)) {
+			// Add every output as a possible action
+			Object.keys(this.memory.actions).forEach(cmd => grid.output(cmd));
+			var output = grid.predict(input);
+			if (output) {
+				this.emit('action', output);
 			}
+			this.save();
 		}
 	}
 
-	isExpected(pattern, source) {
-		console.debug('Conditioning.prototype.isExpected()', pattern && pattern.toString(), source);
-		if (pattern && source) {
-			var input = this.consequences.match(pattern, source);
-			if (input && input.rels && input.rels.length) {
-				// Check recent actions (last minute)
-				var cutoff = Utils.timestamp() - Utils.randomLHS(60 * 1000);
-				var expected = input.rels.filter(rel => rel.output && rel.lastUsed > cutoff);
-				if (expected.length) {
-					// As expected? Strengthen expectations and exit.
-					expected.forEach(rel => {
-						rel.affinity += Utils.random(0.25); 
-						if (rel.affinity > 1) rel.affinity = 1;
-					});
-					return true;
-				}
-			}
-			// Unexpected? Take notice.
-			input = this.consequences.unrecognized(pattern, source);
-			this.mapConsequences(input);
-		}
-		return false;
-	}
-
-	mapConsequences(input) {
-		console.debug('Conditioning.prototype.mapConsequences()');
-		var cutoff = Utils.timestamp() - Utils.randomLHS(60 * 1000),
-			actions = this.memory.actions;
-		if (!input) return;
-		Object.keys(actions)
-			.filter(action => actions[action] > cutoff)
-			.forEach(action => {
-				var output = this.consequences.output(action);
-				var factor = 1 - (actions[action] - cutoff) / (60 * 1000);
-				this.consequences.link(output, input, undefined, factor * 2);
-			});
-	}
-
-	getReaction(pattern, source) {
-		console.debug('Conditioning.prototype.getReaction()');
-		var output, relationship;
-		if (pattern && source) {
-			// Ok... do we need to react?
-			var input = this.reactions.match(pattern, source);
-			if (!input) input = this.reactions.unrecognized(pattern, source);
-			relationship = this.reactions.derive(input);
-			output = relationship && relationship.output;
-			console.log('Reaction related to input: ', output);
-			// No reaction to input? 
-			if (!output && Math.random() < 0.2) {
-				output = this.reactions.random();
-				console.log('Reaction at random: ', output);
-			}
-			// Process relationship
-			if (output || input) {
-				this.reactions.link(output, input, relationship);
+	isExpected(input) {
+		console.debug('Conditioning.prototype.isExpected()', input);
+		var expected = false;
+		if (input) {
+			// Check recent actions (last minute)
+			var actions = this.memory.actions;
+			var consequences = this.memory.consequences;
+			var cutoff = Utils.timestamp() - Utils.randomLHS(60 * 1000);
+			var recent = Object.keys(actions).filter(cmd => actions[cmd] > cutoff);
+			var index = consequences.output(input);
+			if (recent.length) {
+				// Check each recent action vs known consequences
+				recent.forEach(cmd => {
+					consequences.input(cmd);
+					if (consequences.predict(cmd) === input) {
+						// Yes? Notify caller & strengthen manually.
+						// The more recent an action was the more likely 
+						// that new input occurred as consequence.
+						expected = true;
+						var weight = (actions[cmd] - cutoff) / (60 * 1000);
+						consequences.strengthen(cmd, input, weight);
+					}
+				});
 			}
 		}
-		return output;
-	}
-
-	// Try a new output;
-	experiment() {
-		console.debug('Conditioning.prototype.experiment()');
-		var output = this.reactions.random(this.devices);
-		if (output && output.cmd) {
-			this.reactions.link(output);
-			this.emit('action', output.cmd);
-		}
+		return expected;
 	}
 
 	// Save to file
@@ -141,3 +99,5 @@ class Conditioning extends Observable {
 if (typeof module !== 'undefined') {
   module.exports = Conditioning;
 }
+
+

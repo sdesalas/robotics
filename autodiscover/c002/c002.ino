@@ -22,8 +22,9 @@ Queue<Tone> tones = Queue<Tone>(32);
 Queue<Flash> reds = Queue<Flash>(32);
 Queue<Flash> greens = Queue<Flash>(32);
 int currentPitch;
-char delimiter = '>';
-char delimiter2 = '|';
+char delimiter_out = '>';
+char delimiter_in = '<';
+char delimiter_break = '|';
 
 // Inputs
 int LIGHT = A5;
@@ -88,7 +89,7 @@ void interpret() {
       // Help - List Available commands
       //
       if (command_length < 3) {
-        Serial.print(delimiter);
+        Serial.print(delimiter_in);
         Serial.println("B|R|G");
         return;
       };
@@ -101,9 +102,9 @@ void interpret() {
           // Buzzer Example
           //
           batch = random(1, 5); 
-          Serial.print(delimiter);
+          Serial.print(delimiter_out);
           for (int i = 0; i < batch; i++) {
-            if (i > 0) { Serial.print(delimiter2); }
+            if (i > 0) { Serial.print(delimiter_break); }
             Serial.write(b2c64(random(0, 63))); //--> base64 tone (part 1)
             Serial.write(b2c64(random(0, 63))); //--> base64 tone (part 2)
             Serial.write(b2c64(randomLHS(0, 63))); //--> base64 duration
@@ -117,9 +118,9 @@ void interpret() {
           // Red/Green LED Example
           //
           batch = randomLHS(1, 5); // 1-5 (left-leaning distribution)
-          Serial.print(delimiter);
+          Serial.print(delimiter_out);
           for (int i = 0; i < batch; i++) {
-            if (i > 0) { Serial.print(delimiter2); }
+            if (i > 0) { Serial.print(delimiter_break); }
             Serial.write(random(48, 50)); // '0' or '1' --> on/off
             Serial.write(b2c64(random(0, 63))); //--> base64 duration
           }
@@ -150,7 +151,8 @@ void interpret() {
       }
       go_quiet = { due, 0, 1 };
       tones.push(go_quiet);
-      Serial.println("--OK");
+      Serial.println();
+      //Serial.println("--OK");
       return;
 
     case 'R':
@@ -176,7 +178,8 @@ void interpret() {
       }
       switch_off = { due, 0, 0 };
       ((command[0] == 'G') ? greens : reds).push(switch_off); // Turn off when finished
-      Serial.println("--OK");
+      //Serial.println("--OK");
+      Serial.println();
       return;
     default:
       Serial.println("--ERR");
@@ -190,7 +193,7 @@ void act() {
     if (delayedtone.due < millis()) { // Is it due?
       delayedtone = tones.pop();
       //printf("Acting on delay, %d items left", tones.count());
-      Serial.println();
+      //Serial.println();
       tone(BUZ, delayedtone.pitch, delayedtone.duration);
       currentPitch = delayedtone.pitch;
     }
@@ -201,7 +204,7 @@ void act() {
     if (flash.due < millis()) {
       flash = greens.pop();
       //printf("Acting on delay, %d items left", greens.count());
-      Serial.println();
+      //Serial.println();
       digitalWrite(LED_G, flash.onOff);
     }
   }
@@ -211,7 +214,7 @@ void act() {
     if (flash.due < millis()) {
       flash = reds.pop();
       //printf("Acting on delay, %d items left", reds.count());
-      Serial.println();
+      //Serial.println();
       digitalWrite(LED_R, flash.onOff);
     }
   }
@@ -220,19 +223,19 @@ void act() {
 void sense() {
   // Light Sensor
   Serial.print('G'); 
-  Serial.print(delimiter);
+  Serial.print(delimiter_out);
   Serial.println(digitalRead(LED_G));
   Serial.print('L');
-  Serial.print(delimiter);
+  Serial.print(delimiter_out);
   Serial.println(map(analogRead(LIGHT), 0, 1023, 0, 15));
   Serial.print('R');
-  Serial.print(delimiter);
+  Serial.print(delimiter_out);
   Serial.println(digitalRead(LED_R));
   Serial.print('B');
-  Serial.print(delimiter);
+  Serial.print(delimiter_out);
   Serial.println(currentPitch);
   Serial.print('W');
-  Serial.print(delimiter);
+  Serial.print(delimiter_out);
   Serial.println(getRFMessage());
 }
 

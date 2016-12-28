@@ -1,6 +1,7 @@
 "use strict";
 
-const Mind = require('../')
+const config = require('../config');
+const Mind = require('../');
 
 //
 // Manages the sensor cycle and detects pattern changes
@@ -18,7 +19,7 @@ class SensorCycle {
 		this.options = options = options || {};
 		this.options.bufferSize = (options.size || 256) / 8;
 		this.options.historySize = this.options.bufferSize / 2;
-		this.options.delimiter = options.delimiter || '>';
+		this.options.delimiterOut = options.delimiterOut || config.DELIMITER_OUT;
 		// Initialize
 		if (options.data) {
 			options.data.forEach(this.update.bind(this));
@@ -29,9 +30,9 @@ class SensorCycle {
 		var options = this.options;
 		var deviation = 1, surprise = 0;
 		// "S7L>0" --> sensor="S7L", payload="0"
-		var dataparts = data.split(options.delimiter);
+		var dataparts = data.split(options.delimiterOut);
 		if (dataparts.length !== 2) {
-			console.warn('Delimiter "%s" missing in message "%s"', options.delimiter, data);
+			console.debug('Warning: Delimiter "%s" missing in message "%s"', options.delimiterOut, data);
 			return this;
 		}
 		var source = dataparts.shift();
@@ -79,7 +80,7 @@ class SensorCycle {
 			data: data,
 			source: source,
 			payload: payload,
-			expected: expectedSource ? [expectedSource, options.delimiter, expectedPayload].join('') : undefined,
+			expected: expectedSource ? [expectedSource, options.delimiterOut, expectedPayload].join('') : undefined,
 			history: history,
 			deviation: deviation,
 			surprise: surprise

@@ -3,6 +3,7 @@
 const fs = require('fs');
 const Observable = require('events');
 const Pattern = require('./Pattern');
+const config = require('../config');
 const Utils = require('./Utils');
 const Mind = require('../');
 
@@ -17,7 +18,7 @@ class ReflectionManager extends Observable {
 		options = options || {};
 		this.memory = options.memory || {};
 		this.devices = options.devices || {};
-		this.delimiter = options.delimiter || DEFAULT_DELIMITER;
+		this.delimiterIn = options.delimiterIn || config.DELIMITER_IN;
 		// Attach event listeners
 		if (options.listeners) {
 			for(var event in options.listeners) {
@@ -45,7 +46,7 @@ class ReflectionManager extends Observable {
 		console.debug('ReflectionManager.prototype.queryActions()', device && device.id, action);
 		if (device && device.write) { 
 			if (action) {
-				return device.write('?' + this.delimiter + action);
+				return device.write('?' + this.delimiterIn + action);
 			}
 			return device.write('?')
 		} else {
@@ -61,6 +62,28 @@ class ReflectionManager extends Observable {
 		}
 	}
 
+	// Try a new output that hasn't been tried before
+	// TODO: This should ideally incorporate trying known outputs  
+	// that do not have a strong relationship to any input.
+	// (actions that we are aware of, but do not understand what they are for)
+	// And when doing this, we should also pick actions that have recently experimented with.
+	// (are still in the process of figuring out).
+	experiment() {
+		console.debug('ReflectionManager.prototype.experiment()');
+		var output;
+		if (Object.keys(this.devices).length) {
+			var device = Utils.random(this.devices);
+			var command = device.randomCommand();
+			if (device && command) {
+				output = device.id + '.' + command;
+			}
+		}
+		if (output) {
+			this.memory.reactions.strengthen(undefined, output);
+			this.emit('action', output);
+		}
+	}
+
 	fulfill() {
 		console.debug('ReflectionManager.prototype.fulfill()');
 		// Curiosity: Trial option for a device
@@ -69,7 +92,7 @@ class ReflectionManager extends Observable {
 		var random = Utils.random(100);
 		if (random < 5) {
 			// Lets just try something new..
-			this.emit('experiment');
+			this.experiment();
 		}
 	}
 

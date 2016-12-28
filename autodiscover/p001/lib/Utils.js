@@ -29,6 +29,10 @@ class Utils {
 
 	// Left-side leaning random number (closer to from than to)
 	static randomLHS(from, to, affinity) {
+		if (typeof to === 'undefined') {
+			to = from;
+			from = 0;
+		}
 		var random = Math.random() * (to - from),
 			result = (Math.pow(random, 2) / to) + from;
 		if (to < 2) return result;

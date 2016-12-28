@@ -7,6 +7,7 @@ const crypto = require('crypto');
 const Observable = require('events');
 const SerialPort = require('serialport');
 const readline = SerialPort.parsers.readline('\n');
+const config = require('../config');
 const Utils = require('./Utils');
 const Mind = require('../');
 
@@ -17,14 +18,14 @@ class Device extends Observable {
 		super();
 		if (!options ||
 			!options.port ||
-			!options.dataPath ||
-			!options.delimiter) {
+			!options.dataPath) {
 			throw Error('Error initializing Device.');
 		}
 		console.debug('new Device(port)', options.port.comName);
 		this.port = options.port;
 		this.id = options.port.id;
-		this.delimiter = options.delimiter || DEFAULT_DELIMITER;
+		this.delimiterOut = options.delimiterOut || config.DELIMITER_OUT;
+		this.delimiterIn = options.delimiterIn || config.DELIMITER_IN;
 		this.dataPath = options.dataPath + '/' + this.id;
 		this.inputPath = this.dataPath + '/in';
 		this.outputPath = this.dataPath + '/out';
@@ -70,7 +71,7 @@ class Device extends Observable {
 	write(data) {
 		console.debug('Device.prototype.write()', data);
 		if (this.connection.isOpen()) {
-			this.connection.write(data, console.debug.bind(console, 'Data written to ' + this.port.comName));
+			this.connection.write(data, console.debug.bind(console, 'Data written to ' + this.port.comName, data));
 		} else {
 			this.connect(function(connection) {
 				connection.write(data);
@@ -83,7 +84,7 @@ class Device extends Observable {
 		if (key) {
 			var action = Utils.random(this.actions[key]);
 			if (action) {
-				return key + this.delimiter + action;
+				return key + this.delimiterIn + action;
 			}
 		}
 	}
@@ -93,26 +94,25 @@ class Device extends Observable {
 		data = data.slice(0, -1); 
 		// Watch for help commands 
 		// and keep available actions updated
-		if (data && data.indexOf('?') === 0 && data.indexOf(this.delimiter) > 0) {
+		if (data && data.indexOf('?' + this.delimiterIn) === 0) {
 			console.debug('Device.prototype.data().help()', data);
-			var help, key, action, available;
-			help = data.substr(data.indexOf(this.delimiter) + 1);
-			if (help.indexOf(this.delimiter) === -1) {
-				// No second delimiter 
+			data = data.substr(2);
+			if (data.indexOf(this.delimiterOut) === -1) {
+				// No output delimiter 
 				// (action listing)
-				// ie: ?>A|B|C
+				// ie: ?<A|B|C
 				console.debug('Device.prototype.data().help().listing()');
-				help.split('|').forEach(action => this.actions[action] = []);
+				data.split('|').forEach(action => this.actions[action] = []);
 			} else {
-				// Second delimiter present 
+				// Output delimiter present 
 				// (Help about an action)
-				// ie: ?>B>5a|*d
-				key = help.split(this.delimiter).shift() || '';
-				action = help.substr(key.length + 1);
-				available = this.actions[key];
-				console.debug('Device.prototype.data().help().action()', action);
-				if (available && available.indexOf(action) === -1) {
-					available.push(action);
+				// ie: ?<B>5a|*d
+				var key = data.split(this.delimiterOut).shift() || '';
+				var cmd = data.substr(data.indexOf(this.delimiterOut) + 1);
+				var available = this.actions[key];
+				console.debug('Device.prototype.data().help().action()', cmd);
+				if (available && available.indexOf(cmd) === -1) {
+					available.push(cmd);
 					//available.push(new Buffer(action));
 					//available.push(action.split('').map(chr => chr.charCodeAt(0) & 255));
 				}

@@ -3,12 +3,10 @@
 const fs = require('fs');
 const crypto = require('crypto');
 const Observable = require('events');
+const config = require('../config');
 const Device = require('./Device');
 const SerialPort = require('serialport');
 const Mind = require('../');
-
-const DEFAULT_MANUFACTURERS = /(wch)|(arduino)|(1a86)/;
-const DEFAULT_BAUDRATE = 115200;
 
 //
 // Managers USB connections and disconnections
@@ -23,9 +21,10 @@ class DeviceManager extends Observable {
 		}
 		super();
 		options = options || {};
-		options.baudRate = options.baudRate || DEFAULT_BAUDRATE;
-		options.manufacturers = options.manufacturers || DEFAULT_MANUFACTURERS;
-		options.delimiter = options.delimiter || DEFAULT_DELIMITER;
+		options.baudRate = options.baudRate || config.BAUDRATE;
+		options.manufacturers = options.manufacturers || config.MANUFACTURERS;
+		options.delimiterIn = options.delimiterIn || config.DELIMITER_IN;
+		options.delimiterOut = options.delimiterOut || config.DELIMITER_OUT;
 		this.options = options;
 		this.devices = options.devices || {};
 		// Attach event listeners
@@ -88,7 +87,8 @@ class DeviceManager extends Observable {
 		var device = new Device({
 			port: port, 
 			dataPath: this.options.dataPath,
-			delimiter: this.options.delimiter,
+			delimiterIn: this.options.delimiterIn,
+			delimiterOut: this.options.delimiterOut,
 			index: Object.keys(this.devices).length
 		});
 		this.devices[device.id] = device;

@@ -2,7 +2,7 @@
 
 class Pattern extends Array {
 
-  static load(array) {
+  static generate(array) {
     var pattern = new Pattern();
     pattern.push.apply(pattern, array);
     return pattern;

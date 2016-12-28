@@ -8,6 +8,7 @@ describe('class Pattern', function() {
   it('new Pattern()', function() {
     assert.equal(typeof Pattern, 'function', 'Pattern is a function')
     assert(new Pattern() instanceof Array, 'new Pattern() instanceof Array');
+    assert(Pattern.generate() instanceof Array, 'Pattern.generate() instanceof Array');
     assert.equal(JSON.stringify(new Pattern()), '[]', 'new Pattern()');
     assert.equal(JSON.stringify(new Pattern(2)), '[null,null]', 'new Pattern(2)');
     assert.equal(JSON.stringify(new Pattern([])), '[[]]', 'new Pattern([])');
@@ -23,6 +24,14 @@ describe('class Pattern', function() {
     assert.equal(new Pattern('2134').hash, '001778e0', 'new Pattern("2134").hash');
     assert.equal(new Pattern('999','x','b').hash, '2be4d87b', 'new Pattern("999","x","b").hash');
     assert.equal(new Pattern([undefined,'zi953']).hash, '51fd065c', 'new Pattern([undefined,"zi953"]).hash');
+  });
+
+  it('pattern.vectorCode', function() {
+    assert.equal(new Pattern().vectorCode, '0', 'new Pattern().vectorCode');
+    assert.equal(new Pattern('1', '1', '7').vectorCode, '6', 'new Pattern("1", "1", "7").vectorCode');
+    assert.equal(new Pattern('1', '1', '7').vectorCode, new Pattern('1', 7, 7).vectorCode, 'new Pattern("1", "1", "7").vectorCode');
+    assert.equal(new Pattern('1', '1', '7').vectorCode, new Pattern('7', '1', 1, 1, 1, '1').vectorCode, 'new Pattern("1", "1", "7").vectorCode');
+    assert.equal(new Pattern('999','x','b').vectorCode, '3750103', 'new Pattern("999","x","b").vectorCode');
   });
 
   function mutateDiff(pattern, factor, iterations) {
