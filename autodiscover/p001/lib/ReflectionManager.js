@@ -79,7 +79,13 @@ class ReflectionManager extends Observable {
 			}
 		}
 		if (output) {
+			console.debug('ReflectionManager.prototype.experiment().output()', output);
 			this.memory.reactions.strengthen(undefined, output);
+			this.memory.history.experiments = this.memory.history.experiments || [];
+			this.memory.history.experiments.push({
+				timestamp: Utils.timestamp(),
+				output: output
+			});
 			this.emit('action', output);
 		}
 	}

@@ -1,8 +1,6 @@
 "use strict";
 
-const fs = require('fs');
 const util = require('util');
-const fse = require('fs-extra');
 const crypto = require('crypto');
 const Observable = require('events');
 const SerialPort = require('serialport');
@@ -17,8 +15,7 @@ class Device extends Observable {
 	constructor(options) {
 		super();
 		if (!options ||
-			!options.port ||
-			!options.dataPath) {
+			!options.port) {
 			throw Error('Error initializing Device.');
 		}
 		console.debug('new Device(port)', options.port.comName);
@@ -26,19 +23,10 @@ class Device extends Observable {
 		this.id = options.port.id;
 		this.delimiterOut = options.delimiterOut || config.DELIMITER_OUT;
 		this.delimiterIn = options.delimiterIn || config.DELIMITER_IN;
-		this.dataPath = options.dataPath + '/' + this.id;
-		this.inputPath = this.dataPath + '/in';
-		this.outputPath = this.dataPath + '/out';
 		this.actions = {};
-		// Create dirs
-		[this.dataPath, this.inputPath, this.outputPath].forEach((dir) => {
-			if (!fs.existsSync(dir)) {
-				fse.mkdirsSync(dir);
-			}
-		});
+		this.sensors = [];
 		// Connect to serial
 		this.connect();
-		fs.writeFileSync(this.dataPath + '/device.json', JSON.stringify(this, null, 2));
 	}
 
 	connect() {
@@ -117,8 +105,13 @@ class Device extends Observable {
 					//available.push(action.split('').map(chr => chr.charCodeAt(0) & 255));
 				}
 			}
-			fs.writeFile(this.dataPath + '/device.json', JSON.stringify(this, null, 2));
+			this.emit('changed');
 		} else {
+			if (data && data.indexOf('>') === 1) {
+				if (this.sensors.indexOf(data[0]) === -1) {
+					this.sensors.push(data[0]);
+				}
+			}
 			this.emit('data', this.id + '.' + data);
 		}
 	}

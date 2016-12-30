@@ -51,7 +51,7 @@ class Mind extends Observable {
 			delimiterIn: options.delimiterIn,
 			delimiterOut: options.delimiterOut,
 			devices: this.devices,
-			dataPath: './data',
+			dataPath: options.dataPath,
 			listeners: {
 				'ready': this.emit.bind(this, 'ready'),
 				'deviceready': this.emit.bind(this, 'deviceready'),
@@ -77,7 +77,8 @@ class Mind extends Observable {
 			}
 		});
 		this.api = new Api({
-			state: this
+			state: this,
+			dataPath: options.dataPath
 		});
 		this.on('data', this.data.bind(this));
 		this.on('surprise', this.conditioning.surprise.bind(this.conditioning));

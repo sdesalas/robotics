@@ -3,7 +3,6 @@
 const fs = require('fs');
 const fusspot = require('fusspot');
 const Observable = require('events');
-const Association = require('./Association');
 const Pattern = require('./Pattern');
 const Utils = require('./Utils');
 const Mind = require('../');
@@ -21,7 +20,7 @@ class Conditioning extends Observable {
 		this.dataPath = options.dataPath;
 		this.memory = options.memory || {};
 		this.memory.actions = {};
-		this.memory.vectors = {};
+		this.memory.history = { surprises: [], reactions: [], experiments: []};
 		this.memory.reactions = new fusspot.Grid();
 		this.memory.consequences = new fusspot.Grid({ adaptive: false });
 		this.options = options;
@@ -44,14 +43,25 @@ class Conditioning extends Observable {
 		console.debug('Conditioning.prototype.surprise()', input, update.source);
 		var source = update.source;
 		var grid = this.memory.reactions;
-		var vectorCode = Pattern.generate(update.history).vectorCode;
-		var vector = this.memory.vectors[input] = this.memory.vectors[input] || {};
-		vector[new Date().getTime()] = update.history.join();
-		if (!this.isExpected(input)) {
+		var timestamp = Utils.timestamp();
+		var surprise = {
+			timestamp: timestamp,
+			source: update.source,
+			input: input,
+			history: update.history.join(),
+			isExpected: this.isExpected(input)
+		};
+		this.memory.history.surprises.push(surprise);
+		if (!surprise.isExpected) {
 			// Add every output as a possible action
 			Object.keys(this.memory.actions).forEach(cmd => grid.output(cmd));
 			var output = grid.predict(input);
 			if (output) {
+				this.memory.history.reactions.push({
+					timestamp: timestamp,
+					input: input,
+					output: output
+				});
 				this.emit('action', output);
 			}
 			this.save();

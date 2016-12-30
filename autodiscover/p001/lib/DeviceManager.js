@@ -86,15 +86,16 @@ class DeviceManager extends Observable {
 		// Add to list of known devices
 		var device = new Device({
 			port: port, 
-			dataPath: this.options.dataPath,
 			delimiterIn: this.options.delimiterIn,
 			delimiterOut: this.options.delimiterOut,
 			index: Object.keys(this.devices).length
 		});
 		this.devices[device.id] = device;
 		device.on('connected', this.emit.bind(this, 'deviceready', device.id, device.dataPath));
+		device.on('connected', this.save.bind(this));
 		device.on('disconnect', this.remove.bind(this, device.id));
 		device.on('data', this.emit.bind(this, 'data'));
+		device.on('changed', this.save.bind(this));
 		return this;
 	}
 
@@ -109,6 +110,12 @@ class DeviceManager extends Observable {
 				this.emit('offline');
 			}
 		}
+	}
+
+	// Save device information
+	save() {
+		console.debug('DeviceManager.prototype.save()');
+		fs.writeFileSync(this.options.dataPath + '/devices.json', JSON.stringify(this.devices, null, 2));
 	}
 }
 
