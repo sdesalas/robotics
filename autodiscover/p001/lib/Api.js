@@ -12,7 +12,6 @@ class Api extends Observable {
         options = options || {};
         this.port = options.port || 8199;
         this.state = options.state || {};
-        this.dataPath = options.dataPath || 'data';
         this.router = new HttpDispatcher();
         this.router.setStatic('/static');
         this.router.setStaticDirname('static');
@@ -32,7 +31,7 @@ class Api extends Observable {
         // Start server
         this.server = http.createServer((req, res) => {
             this.router.dispatch(req, res);
-        }).listen(this.port, '127.0.0.1', this.emit.bind(this, 'ready'));
+        }).listen(this.port, this.emit.bind(this, 'ready'));
     }
 
     getRoot(req, res) {
@@ -61,7 +60,7 @@ class Api extends Observable {
 
     getLog(req, res) {
         res.writeHead(200, {'Content-Type': 'text/plain'});
-        fsr('mind.log', {matcher: /(\r?\n)/}).pipe(res);
+        fsr('brain.log', {matcher: /(\r?\n)/}).pipe(res);
     }
 
     onError(req, res) {

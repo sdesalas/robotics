@@ -1,8 +1,9 @@
 #!/usr/bin/env node
+
 const fs = require('fs');
 const util = require('util');
 const program = require('commander');
-const Mind = require('../');
+const Brain = require('../');
 
 // options
 program
@@ -20,7 +21,7 @@ function log() {
 }
 
 // start
-var mind = new Mind({ 
+var brain = new Brain({ 
     debug: program.debug,
     listeners: {
         ready: function(devices) {

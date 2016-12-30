@@ -2,6 +2,7 @@ const Api = require('./lib/Api.js');
 const fs = require('fs');
 const opn = require('opn');
 
+console.log('Spinning up static site..');
 var api = new Api({
     state: {
         memory: JSON.parse(fs.readFileSync('data/memory.json')),
@@ -14,3 +15,4 @@ var api = new Api({
         }
     }
 });
+

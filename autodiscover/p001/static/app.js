@@ -151,17 +151,13 @@ var app = new Vue({
                 //this.charts.grid.update();
                 if (Math.random() < 0.3) {
                     var topReactionsChartData = this.topReactionsChartData;
-                    if (topReactionsChartData.length > 1) {
-                        topReactionsChartData.forEach((dataset, i) => this.charts.data.topReactions.datasets[i] = dataset);
-                        this.charts.data.topReactions.labels = this.memory.reactions.outputs;
-                        this.charts.topReactions.update();
-                    }
+                    topReactionsChartData.forEach((dataset, i) => this.charts.data.topReactions.datasets[i] = dataset);
+                    this.charts.data.topReactions.labels = this.memory.reactions.outputs;
+                    this.charts.topReactions.update();
                     var topConsequencesChartData = this.topConsequencesChartData;
-                    if (topConsequencesChartData.length > 1) {
-                        topConsequencesChartData.forEach((dataset, i) => this.charts.data.topConsequences.datasets[i] = dataset);
-                        this.charts.data.topConsequences.labels = this.memory.consequences.outputs;
-                        this.charts.topConsequences.update();
-                    }
+                    topConsequencesChartData.forEach((dataset, i) => this.charts.data.topConsequences.datasets[i] = dataset);
+                    this.charts.data.topConsequences.labels = this.memory.consequences.outputs;
+                    this.charts.topConsequences.update();
                 }
                 this.charts.data.history.datasets[0].data = this.surprisesActivityData;
                 this.charts.data.history.datasets[1].data = this.reactionsActivityData;
@@ -429,7 +425,7 @@ app.charts.topReactions = new Chart('topReactionsChart', {
     options: {
         responsive: true,
         legend: {
-            position: 'top',
+            display: false,
         },
         title: {
             display: true,
@@ -448,7 +444,7 @@ app.charts.topConsequences = new Chart('topConsequencesChart', {
     options: {
         responsive: true,
         legend: {
-            position: 'top',
+            display: false,
         },
         title: {
             display: true,

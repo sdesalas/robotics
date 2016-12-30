@@ -11,10 +11,10 @@ const ReflectionManager = require('./lib/ReflectionManager');
 const DeviceManager = require('./lib/DeviceManager');
 const Api = require('./lib/Api');
 
-class Mind extends Observable {
+class Brain extends Observable {
 
 	constructor(options) {
-		console.debug('new Mind()', options);
+		console.debug('new Brain()', options);
 		super();
 		options = options || {};
 		options.dataPath = options.dataPath || config.DATA_PATH;
@@ -28,7 +28,7 @@ class Mind extends Observable {
 			}
 		}
 		// Internal fields
-		Mind.debugMode = options.debug;
+		Brain.debugMode = options.debug;
 		this.devices = {};
 		this.memory = {};
 		this.options = options;
@@ -36,7 +36,7 @@ class Mind extends Observable {
 
 	// YAWN! Time to wake up!
 	wakeUp() {
-		console.debug('Mind.prototype.wakeUp()', this.options);
+		console.debug('Brain.prototype.wakeUp()', this.options);
 		var options = this.options;
 		this.cycle = new SensorCycle({ 
 			size: options.memSize,
@@ -97,7 +97,7 @@ class Mind extends Observable {
 	// Aggregated incoming data pipeline for all the sensors.
 	// This gets called pretty frequently so should be optimised!
 	data(data) {
-		console.debug('Mind.prototype.data()', data);
+		console.debug('Brain.prototype.data()', data);
 		if (data.indexOf(this.options.delimiterOut) !== -1) {
 			var update = this.cycle.update(data).lastUpdate;
 			if (update && update.surprise) { 
@@ -115,7 +115,7 @@ class Mind extends Observable {
 	// this.action("mf.r<1"); 		//--> {device: "mf", vpin: "r", data: "1" } // Turns on Red LED
 	// this.action("yA.b<&a|63"); 	//--> {device: "yA", vpin: "b", data: "&a|63" } // Runs 2 tones on buzzer
 	action(action) {
-		console.warn('Mind.prototype.action()', action);
+		console.warn('Brain.prototype.action()', action);
 		var delimiterIn = this.options.delimiterIn;
 		if (action && action.indexOf(delimiterIn)) {
 			// Find device & write to it
@@ -129,13 +129,13 @@ class Mind extends Observable {
 }
 
 console.debug = function() {
-	if (Mind.debugMode) {
+	if (config.DEBUG) {
 		console.log.apply(console, arguments);
 	}
 }
 
 
 if (typeof module !== 'undefined') {
-	module.exports = Mind;
+	module.exports = Brain;
 }
 

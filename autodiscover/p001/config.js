@@ -1,4 +1,5 @@
 module.exports = {
+    DEBUG: true,
     DATA_PATH: './data',
     DELIMITER_OUT: '>',
     DELIMITER_IN: '<',

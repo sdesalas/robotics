@@ -1,1 +1,0 @@
-node mind > mind.log

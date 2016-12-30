@@ -1,5 +1,5 @@
 {
-  "name": "mind001",
+  "name": "botbrain",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -15,8 +15,8 @@
     "mocha": "^3.1.2"
   },
   "scripts": {
-    "start": "node ./bin/mind --debug > mind.log",
-    "serve": "node static.js",
+    "start": "node ./bin/brain --debug > brain.log",
+    "static": "node static.js",
     "test": "node ./node_modules/mocha/bin/mocha --invert --grep Performance",
     "test:Pattern": "node ./node_modules/mocha/bin/mocha --grep Pattern",
     "test:SensorCycle": "node ./node_modules/mocha/bin/mocha --grep SensorCycle",

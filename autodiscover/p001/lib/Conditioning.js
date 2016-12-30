@@ -5,7 +5,7 @@ const fusspot = require('fusspot');
 const Observable = require('events');
 const Pattern = require('./Pattern');
 const Utils = require('./Utils');
-const Mind = require('../');
+const Brain = require('../');
 
 // 
 // Manages the strengthening relationships between inputs and outputs
