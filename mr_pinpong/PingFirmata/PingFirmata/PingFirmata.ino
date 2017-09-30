@@ -758,9 +758,9 @@ void setup()
 
   // SDS: Set PWM frequency 
   // https://playground.arduino.cc/Code/PwmFrequency
-  TCCR0B = TCCR0B & 0b11111000 | 0x01; // Timer0 frequency (5, 6)
-  TCCR1B = TCCR1B & 0b11111000 | 0x01; // Timer1 frequency (9, 10)
-  TCCR3B = TCCR3B & 0b11111000 | 0x01; // Timer2 frequency (3, 11) 
+  //TCCR0B = TCCR0B & 0b11111000 | 0x01; // Timer0 frequency (5, 6)
+  //TCCR1B = TCCR1B & 0b11111000 | 0x01; // Timer1 frequency (9, 10)
+  //TCCR3B = TCCR3B & 0b11111000 | 0x01; // Timer2 frequency (3, 11) 
   
   Firmata.attach(ANALOG_MESSAGE, analogWriteCallback);
   Firmata.attach(DIGITAL_MESSAGE, digitalWriteCallback);
