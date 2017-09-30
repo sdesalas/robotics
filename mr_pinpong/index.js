@@ -30,7 +30,7 @@ board.on('ready', () => {
     // INPUT - ultrasound range finder
     const rangefinder = new five.Proximity({ pin: 2, freq: 100, controller: "HCSR04" });
     rangefinder.on('data', () => {
-        if (rangefinder.cm < 20) { 
+        if (rangefinder.cm < 20 && rangefinder > 6) { 
             const closeness = 1 - (rangefinder.cm / 20); // 0 = very far, 1 = very close
             network.unlearn(closeness);
             network.input('rangefinder', 4)(closeness);
