@@ -101,7 +101,7 @@ board.on('ready', () => {
     console.log(`Network ready for display. Please open http://localhost:${port}`);
 
     setInterval(() => {
-        console.log(`L: ${photo_l.value}, R: ${photo_r.value}, B: ${photo_b.value}, US: ${avg_distance}, ML: ${speed_l}, MR: ${speed_r}`);
+        console.log(`L: ${photo_l.value}, R: ${photo_r.value}, B: ${photo_b.value}, US: ${avg_distance.toFixed(2)}, ML: ${speed_l}, MR: ${speed_r}`);
     }, 200);
 });
 
