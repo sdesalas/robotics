@@ -8,13 +8,13 @@ There is random code for Microcontrollers, Sensors, Raspberry Pi, OpenWrt, RF, B
 
 ## Audio Bot
 
-![nala.jpg](nala.jpg)
+![images/nala.jpg](images/nala.jpg)
 
 This one was my first attempt at using NodeJS to communicate between Analog inputs and Linux CPU using the Arduino Yun's Bridge library. This wouldnt have happened without help from the very talented James Fox who got the spectrum analyzer chip sorted with his oscillometer and some spare capacitors he pulled out of an old PC. 
 
 ## Simplebot v1 (Node bot)
 
-![simplebot.jpg](simplebot.jpg)
+![images/simplebot.jpg](images/simplebot.jpg)
 
 Fabrication is not my strong point. 
 
@@ -28,7 +28,7 @@ Pity its so hard to setup in the first place, and that the connection is usually
 
 ## Simplebot v2 (RF Bot)
 
-![robbie.jpg](robbie.jpg)
+![images/robbie.jpg](images/robbie.jpg)
 
 I rebuilt the simplebot, and rewrote the Arduino code to add an RF receiver for the joystick controller below. 
 
@@ -36,19 +36,19 @@ I still feel guilty I pinched Andrew's joystick module from [Nodebots AU](http:/
 
 ## Joystick RF Controller (v1)
 
-![joystick.v1.jpg](joystick.v1.jpg)
+![images/joystick.v1.jpg](images/joystick.v1.jpg)
 
 This is the joystick controller to move the simplebot above.
 
 ## Joystick RF Controller (v2)
 
-![joystick.v2.jpg](joystick.v2.jpg)
+![images/joystick.v2.jpg](images/joystick.v2.jpg)
 
 I added two buttons (green and red for positive and negative feedback), so that I can train the AI for my next project.
 
 ## Gluco-bot (aka R2-D2)
 
-![glucobot.jpg](glucobot.jpg)
+![images/glucobot.jpg](images/glucobot.jpg)
 
 Still work in progress. 
 
@@ -58,7 +58,7 @@ I was a bit too ambitious trying to cut down on size - it doesnt fit in the case
 
 ## Pattern Recognition Trainer
 
-![trainer.jpg](trainer.jpg)
+![images/trainer.jpg](images/trainer.jpg)
 
 A pretty basic setup that allows me to capture environmental sensor data and feed it into a pattern-recognition engine I'm building.
 
@@ -66,8 +66,18 @@ I want the next guy I build to do stuff on his own. Aiming for amoeba-level inte
 
 ## Scooterbot
 
-![scooterbot.jpg](scooterbot.jpg)
+![images/scooterbot.jpg](images/scooterbot.jpg)
 
 After giving up on Gluco-bot, I transferred the parts out to a new enclosure I bought. 
 
 This one was made of cardboard so it was easier to cut out the holes for the servo-motors and zip-tie them in place. I also added some cool-cat glasses and held them up with bluetack and a pair of magnets.
+
+## Mr Ping-Pong
+
+![images/mr_pingpong.jpg](images/mr_pingpong.jpg)
+
+I had an idea to build a nodebot with some sensors and plug them into a [neural network project](https://github.com/sdesalas/botbrains) I was working on.
+
+I found a discarded cardboard teabox with a nice pattern on it and I cut out some holes for the wheels, then added the rest of the guts including some photo-sensors and a HCSR04 ultransonic range finder. The robot was 'alive' in the sense that all data was being sent to a neural network that processed it and fed commands to the motors. 
+
+The code can be found [here](mr_pingpong/index.js).
