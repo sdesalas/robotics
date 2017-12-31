@@ -29,13 +29,17 @@ board.on('ready', () => {
 
     // INPUT - ultrasound range finder
     const rangefinder = new five.Proximity({ pin: 2, freq: 100, controller: "HCSR04" });
+    let avg_distance = 20;
     rangefinder.on('data', () => {
-        if (rangefinder.cm < 20 && rangefinder > 6) { 
-            const closeness = 1 - (rangefinder.cm / 20); // 0 = very far, 1 = very close
-            network.unlearn(closeness);
-            network.input('rangefinder', 4)(closeness);
+        avg_distance = (avg_distance * 4 + rangefinder.cm * 1) / 5; // moving avg of 5 measurements
+        if (avg_distance < 500 && avg_distance > 6) {
+            const remoteness = avg_distance / 500;
+            network.learn(remoteness / 10);
+            network.input('rangefinder', 2)(remoteness);
+            network.input('rangefinder (inverted)', 2)(1 - remoteness)
         } else {
-            network.learn(0.01); // still far? thats a good thing, do more of it
+            // Too close, kick off avoidance reflex
+            avoidObstacle();
         }
     });
 
@@ -79,6 +83,16 @@ board.on('ready', () => {
             timeout_r = setTimeout(() => motor_r.stop(), 2500);
         }
     });
+
+    // AVOIDANCE REFLEX (back out from obstacle)
+    function avoidObstacle() {
+        motor_r.forward(255);
+        setTimeout(() => {
+            motor_l.forward(255);
+            motor_r.stop();
+            setTimeout(() => motor_l.stop(), 1000);
+        }, 1000);
+    }
 
     // DISPLAY VIA LOCAHOST
     var display = botbrains.Toolkit.visualise(network);
