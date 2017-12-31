@@ -32,8 +32,8 @@ board.on('ready', () => {
     let avg_distance = 20;
     rangefinder.on('data', () => {
         avg_distance = (avg_distance * 4 + rangefinder.cm * 1) / 5; // moving avg of 5 measurements
-        if (avg_distance < 500 && avg_distance > 6) {
-            const remoteness = avg_distance / 500;
+        if (avg_distance < 1000 && avg_distance > 6) {
+            const remoteness = avg_distance / 1000;
             network.learn(remoteness / 10);
             network.input('rangefinder', 2)(remoteness);
             network.input('rangefinder (inverted)', 2)(1 - remoteness)
