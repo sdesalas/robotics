@@ -78,6 +78,8 @@ This one was made of cardboard so it was easier to cut out the holes for the ser
 
 I had an idea to build a nodebot with some sensors and plug them into a [neural network project](https://github.com/sdesalas/botbrains) I was working on.
 
-I found a discarded cardboard teabox with a nice pattern on it and I cut out some holes for the wheels, then added the rest of the guts including some photo-sensors and a HCSR04 ultransonic range finder. The robot was 'alive' in the sense that all data was being sent to a neural network that processed it and fed commands to the motors, reinforcing all recent actions that increased the exposure to light. In other words, a 'light-seeking' robot.
+I found a discarded cardboard teabox with a nice pattern on it and I cut out some holes for the wheels, then added the rest of the guts including some photo-sensors and a HCSR04 ultransonic range finder. 
 
-The code can be found [here](mr_pingpong/index.js).
+The robot was 'alive' in the sense that all data was being sent to a neural network that processed it and fed commands to the motors, reinforcing all recent actions that increased the exposure to light. 
+
+In other words, a 'light-seeking' robot. The code can be found [here](mr_pingpong/index.js).
