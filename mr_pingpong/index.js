@@ -37,11 +37,11 @@ board.on('ready', () => {
             const remoteness = range / 1200;
             network.input('rangefinder', 2)(remoteness);
             network.input('rangefinder (inverted)', 2)(1 - remoteness)
-            if (Math.random() < .1) {
+            if (Math.random() < .5) {
                 let learning_rate = 1 - Math.abs(1 - (range / avg_range));
                 learning_rate = learning_rate > 1 ? 1 : learning_rate;
                 console.log(`LEARN (DISTANCE): ${learning_rate.toFixed(2)}`);
-                network.learn(learning_rate / 20);
+                network.learn(learning_rate / 50);
             }
         } else {
             // Too close, kick off avoidance reflex and unlearn recent actions
@@ -55,11 +55,11 @@ board.on('ready', () => {
     photo_b.on('data', () => {
         light = (light * 4 + (photo_l.value + photo_r.value) / 2) / 5; // moving avg of 5 measurements
         avg_light = (avg_light * 499 + light) / 500; // moving avg of 500 measurements
-        if (Math.random() < .1) {
+        if (Math.random() < .5) {
             let learning_rate = 1 - (light - avg_light) / avg_light;
             learning_rate = learning_rate < 0 ? 0 : learning_rate;
             console.log(`LEARN (LIGHT): ${learning_rate.toFixed(2)}`);
-            network.learn(learning_rate / 20);
+            network.learn(learning_rate / 50);
         }
     });
 
