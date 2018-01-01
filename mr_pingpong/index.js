@@ -54,7 +54,7 @@ board.on('ready', () => {
     let light = 512, avg_light = 512;
     photo_b.on('data', () => {
         light = (light * 4 + (photo_l.value + photo_r.value) / 2) / 5; // moving avg of 5 measurements
-        avg_light = (avg_light * 99 + light) / 500; // moving avg of 500 measurements
+        avg_light = (avg_light * 499 + light) / 500; // moving avg of 500 measurements
         if (Math.random() < .2) {
             let learning_rate = (light - avg_light) / avg_light;
             learning_rate = learning_rate > 1 ? 1 : learning_rate;
