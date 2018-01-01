@@ -38,8 +38,9 @@ board.on('ready', () => {
             network.input('rangefinder', 2)(remoteness);
             network.input('rangefinder (inverted)', 2)(1 - remoteness)
         } else {
-            // Too close, kick off avoidance reflex
+            // Too close, kick off avoidance reflex and unlearn recent actions
             avoidObstacle();
+            network.unlearn();
         }
     });
 
