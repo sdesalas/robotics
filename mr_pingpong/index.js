@@ -37,10 +37,10 @@ board.on('ready', () => {
             const remoteness = range / 1200;
             network.input('rangefinder', 2)(remoteness);
             network.input('rangefinder (inverted)', 2)(1 - remoteness)
-            if (Math.random() < .2) {
+            if (Math.random() < .1) {
                 let learning_rate = 1 - Math.abs(1 - (range / avg_range));
                 learning_rate = learning_rate > 1 ? 1 : learning_rate;
-                console.log('LEARN (DISTANCE):' + learning_rate.toFixed(2));
+                console.log(`LEARN (DISTANCE): ${learning_rate.toFixed(2)} || ${network.strength} || ${network.weight}`);                
                 network.learn(learning_rate / 50);
             }
         } else {
@@ -51,14 +51,14 @@ board.on('ready', () => {
     });
 
     // LEARN - Is light increasing? Use this to drive learning.
-    let light = 512, avg_light = 512;
+    let light = 0, avg_light = 0;
     photo_b.on('data', () => {
         light = (light * 4 + (photo_l.value + photo_r.value) / 2) / 5; // moving avg of 5 measurements
         avg_light = (avg_light * 499 + light) / 500; // moving avg of 500 measurements
-        if (Math.random() < .2) {
+        if (Math.random() < .1) {
             let learning_rate = (light - avg_light) / avg_light;
             learning_rate = learning_rate > 1 ? 1 : learning_rate;
-            console.log('LEARN (LIGHT):' + learning_rate.toFixed(2));
+            console.log(`LEARN (LIGHT): ${learning_rate.toFixed(2)} || ${network.strength} || ${network.weight}`);
             network.learn(learning_rate / 50);
         }
     });
@@ -109,7 +109,7 @@ board.on('ready', () => {
     console.log(`Network ready for display. Please open http://localhost:${port}`);
 
     setInterval(() => {
-        console.log(`L: ${photo_l.value}, R: ${photo_r.value}, B: ${photo_b.value}, LIGHT:${Math.round(light)}/${Math.round(avg_light)} RNG: ${Math.round(range)}/${Math.round(avg_range)} => ML: ${speed_l}, MR: ${speed_r}`);
+        console.log(`L: ${photo_l.value}, R: ${photo_r.value}, B: ${photo_b.value}, LIGHT: ${Math.round(light)}/${Math.round(avg_light)} RNG: ${Math.round(range)}/${Math.round(avg_range)} => ML: ${speed_l}, MR: ${speed_r}`);
     }, 200);
 });
 
