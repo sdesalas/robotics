@@ -38,7 +38,7 @@ board.on('ready', () => {
             network.input('rangefinder', 2)(remoteness);
             network.input('rangefinder (inverted)', 2)(1 - remoteness)
             if (Math.random() < .2) {
-                const learning_rate = 1 - Math.abs(1 - (range / avg_range));
+                let learning_rate = 1 - Math.abs(1 - (range / avg_range));
                 learning_rate = learning_rate > 1 ? 1 : learning_rate;
                 console.log('LEARN (DISTANCE):' + learning_rate.toFixed(2));
                 network.learn(learning_rate / 50);
@@ -56,7 +56,7 @@ board.on('ready', () => {
         light = (light * 4 + (photo_l.value + photo_r.value) / 2) / 5; // moving avg of 5 measurements
         avg_light = (avg_light * 99 + light) / 500; // moving avg of 500 measurements
         if (Math.random() < .2) {
-            const learning_rate = (light - avg_light) / avg_light;
+            let learning_rate = (light - avg_light) / avg_light;
             learning_rate = learning_rate > 1 ? 1 : learning_rate;
             console.log('LEARN (LIGHT):' + learning_rate.toFixed(2));
             network.learn(learning_rate / 50);
