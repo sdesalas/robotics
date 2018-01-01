@@ -7,7 +7,7 @@ const board = new five.Board({ port: process.argv[2] || ''});
 
 board.on('ready', () => {
 
-    const network = new botbrains.NeuralNetwork(200, 'sausage');
+    const network = new botbrains.NeuralNetwork(120, 'ball');
 
     // INPUTS - 3 photo-resistors, 2x eyes, 1x back
     const photo_l = new five.Sensor({ pin: 'A0', freq: 100 });
@@ -57,7 +57,7 @@ board.on('ready', () => {
         avg_light = (avg_light * 499 + light) / 500; // moving avg of 500 measurements
         if (Math.random() < .5) {
             let learning_rate = 1 - (light - avg_light) / avg_light;
-            learning_rate = learning_rate < 0 ? 0 : learning_rate;
+            learning_rate = learning_rate > 1 ? 1 : learning_rate;
             console.log(`LEARN (LIGHT): ${learning_rate.toFixed(2)}`);
             network.learn(learning_rate / 50);
         }
