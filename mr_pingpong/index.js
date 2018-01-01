@@ -51,7 +51,7 @@ board.on('ready', () => {
     });
 
     // LEARN - Is light increasing? Use this to drive learning.
-    let light = 0, avg_light = 0;
+    let light = 512, avg_light = 512;
     photo_b.on('data', () => {
         light = (light * 4 + (photo_l.value + photo_r.value) / 2) / 5; // moving avg of 5 measurements
         avg_light = (avg_light * 499 + light) / 500; // moving avg of 500 measurements
