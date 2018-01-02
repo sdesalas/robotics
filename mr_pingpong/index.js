@@ -31,18 +31,16 @@ board.on('ready', () => {
     const rangefinder = new five.Proximity({ pin: 2, freq: 100, controller: "HCSR04" });
     let avg_range = 200, range = 200;
     rangefinder.on('data', () => {
-        range = (range * 4 + rangefinder.cm) / 5; // moving avg of 5 measurements
+        range = (range * 2 + rangefinder.cm) / 3; // moving avg of 3 measurements
         avg_range = (avg_range * 499 + range) / 500; // moving avg of 500 measurements
         if (range < 1200 && range >= 10) {
             const remoteness = range / 1200;
             network.input('rangefinder', 2)(remoteness);
             network.input('rangefinder (inverted)', 2)(1 - remoteness)
-            if (Math.random() < .5) {
-                let learning_rate = 1 - Math.abs(1 - (range / avg_range));
-                learning_rate = learning_rate > 1 ? 1 : learning_rate;
-                console.log(`LEARN (DISTANCE): ${learning_rate.toFixed(2)}`);
-                network.learn(learning_rate / 50);
-            }
+            let learning_rate = 1 - Math.abs(1 - (range / avg_range));
+            learning_rate = learning_rate > 1 ? 1 : learning_rate;
+            console.log(`LEARN (DISTANCE): ${learning_rate.toFixed(2)}`);
+            network.learn(learning_rate / 50);
         } else {
             // Too close, kick off avoidance reflex and unlearn recent actions
             avoidObstacle();
@@ -53,7 +51,7 @@ board.on('ready', () => {
     // LEARN - Is light increasing? Use this to drive learning.
     let light = 512, avg_light = 512;
     photo_b.on('data', () => {
-        light = (light * 4 + (photo_l.value + photo_r.value) / 2) / 5; // moving avg of 5 measurements
+        light = (light * 2 + (photo_l.value + photo_r.value) / 2) / 3; // moving avg of 2 measurements
         avg_light = (avg_light * 499 + light) / 500; // moving avg of 500 measurements
         if (Math.random() < .5) {
             let learning_rate = -1 * ((light - avg_light) / avg_light);
