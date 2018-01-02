@@ -7,7 +7,7 @@ const board = new five.Board({ port: process.argv[2] || ''});
 
 board.on('ready', () => {
 
-    const network = new botbrains.NeuralNetwork(120, 'ball');
+    const network = new botbrains.NeuralNetwork(120, { connectionsPerNeuron: 8, shape: 'tube' });
 
     // INPUTS - 3 photo-resistors, 2x eyes, 1x back
     const photo_l = new five.Sensor({ pin: 'A0', freq: 100 });
@@ -28,7 +28,7 @@ board.on('ready', () => {
     });
 
     // INPUT - ultrasound range finder
-    const rangefinder = new five.Proximity({ pin: 2, freq: 100, controller: "HCSR04" });
+    const rangefinder = new five.Proximity({ pin: 2, freq: 50, controller: "HCSR04" });
     let avg_range = 200, range = 200;
     rangefinder.on('data', () => {
         range = (range * 2 + rangefinder.cm) / 3; // moving avg of 3 measurements
@@ -66,6 +66,7 @@ board.on('ready', () => {
     let timeout_r, speed_r;
     const motor_l = new five.Motor({ pins: { pwm: 6, dir: 7, }, invertPWM: true, });
     const motor_r = new five.Motor({ pins: { pwm: 9, dir: 8, }, invertPWM: true, });
+    let last_action = 0;
     motor_l.stop();
     motor_r.stop();
 
@@ -74,6 +75,7 @@ board.on('ready', () => {
         if (val < 0.4) {
             motor_l.stop();
         } else {
+            last_action = new Date().getTime();
             motor_l.reverse();
             clearTimeout(timeout_l);
             timeout_l = setTimeout(() => motor_l.stop(), val * 2500);
@@ -83,7 +85,8 @@ board.on('ready', () => {
         speed_r = Math.floor(val * 256);
         if (val < 0.4) {
             motor_r.stop();
-        } else {
+        } else {last_action
+            lastActionTime = new Date().getTime();
             motor_r.reverse();
             clearTimeout(timeout_r);
             timeout_r = setTimeout(() => motor_r.stop(), val * 2500);
@@ -91,14 +94,27 @@ board.on('ready', () => {
     });
 
     // AVOIDANCE REFLEX (back out from obstacle)
+    let last_avoidance = 0;
     function avoidObstacle() {
         motor_r.forward(255);
+        last_avoidance = new Date().getTime();
         setTimeout(() => {
             motor_l.forward(200);
             motor_r.stop();
             setTimeout(() => motor_l.stop(), 1000);
         }, 1500);
     }
+
+    // INPUTS 
+    // 1. Boredom gets higher if there is no recent action
+    // 2. No problems means things are good
+    setInterval(() => {
+        const now = new Date().getTime();
+        const boredom = (now - last_action) / 30000;
+        network.input('boredom', 2)(boredom > 1 ? 1 : boredom);
+        const no_avoidance = (now - last_avoidance) / 30000;
+        network.learn(no_avoidance > 1 ? 1 : no_avoidance);
+    }, 200);
 
     // DISPLAY VIA LOCAHOST
     var display = botbrains.Toolkit.visualise(network);
