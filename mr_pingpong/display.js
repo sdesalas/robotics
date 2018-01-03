@@ -6,7 +6,7 @@ var history = {};
 var blankLine = new CLI.Line().fill();
 
 module.exports = {
-    gauge: function(label, value, threshold, max, suffix) {
+    gauge: function(label='', value=0, threshold=0, max=1, suffix='') {
         new CLI.Line()
             .padding(2)
             .column(label, width, [clc.cyan])
@@ -15,7 +15,7 @@ module.exports = {
             .output();
         return this;
     },
-    value: function (label, suffix) {
+    value: function (label='', suffix='') {
         new CLI.Line()
             .padding(2)
             .column(label, width, [clc.cyan])
@@ -24,7 +24,7 @@ module.exports = {
             .output();
         return this;
     },
-    sparkline: function (label, value, suffix) {
+    sparkline: function (label='', value=0, suffix='') {
         var series = history[label] = history[label] || [];
         series.push(item.value);
         if (series.length > width) series.shift();
