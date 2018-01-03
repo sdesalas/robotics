@@ -2,12 +2,13 @@ const fs = require('fs');
 const five = require('johnny-five');
 const botbrains = require('botbrains');
 const EventEmitter = require('events');
+const display = require('./display');
 
 const board = new five.Board({ port: process.argv[2] || ''});
 
 board.on('ready', () => {
 
-    const network = new botbrains.NeuralNetwork(120, { connectionsPerNeuron: 8, shape: 'tube' });
+    const network = new botbrains.NeuralNetwork(120, { connectionsPerNeuron: 5, shape: 'tube' });
 
     // INPUTS - 3 photo-resistors, 2x eyes, 1x back
     const photo_l = new five.Sensor({ pin: 'A0', freq: 100 });
@@ -28,7 +29,7 @@ board.on('ready', () => {
     });
 
     // INPUT - ultrasound range finder
-    const rangefinder = new five.Proximity({ pin: 2, freq: 50, controller: "HCSR04" });
+    const rangefinder = new five.Proximity({ pin: 2, freq: 100, controller: "HCSR04" });
     let avg_range = 200, range = 200;
     rangefinder.on('data', () => {
         range = (range * 2 + rangefinder.cm) / 3; // moving avg of 3 measurements
@@ -117,13 +118,24 @@ board.on('ready', () => {
     }, 200);
 
     // DISPLAY VIA LOCAHOST
-    var display = botbrains.Toolkit.visualise(network);
-    var port = display.address().port;
+    var visualization = botbrains.Toolkit.visualise(network);
 
-    console.log(`Network ready for display. Please open http://localhost:${port}`);
+    console.log(`Network ready for display. Please open http://localhost:${visualization.address().port}`);
 
     setInterval(() => {
-        console.log(`L: ${photo_l.value}, R: ${photo_r.value}, B: ${photo_b.value}, LIGHT: ${Math.round(light)}/${Math.round(avg_light)} RNG: ${Math.round(range)}/${Math.round(avg_range)} => ML: ${speed_l}, MR: ${speed_r}`);
+        display
+            .clear()
+            .blank()
+            .value('PHOTO (L)', photo_l.value)
+            .value('PHOTO (R)', photo_r.value)
+            .value('PHOTO (B)', photo_b.value)
+            .gauge('LIGHT', light, avg_light, avg_light*2, `${Math.round(light)}/${Math.round(avg_light)}`)
+            .gauge('RANGE', range, avg_range, avg_range*2, `${Math.round(range)}/${Math.round(avg_range)} cm`)
+            .gauge('MOTOR (L)', speed_l, 140, 256, speed_l)
+            .gauge('MOTOR (R)', speed_r, 140, 256, speed_r)
+            ;
+
+        //console.log(`L: ${photo_l.value}, R: ${photo_r.value}, B: ${photo_b.value}, LIGHT: RNG: ${Math.round(range)}/${Math.round(avg_range)} => ML: ${speed_l}, MR: ${speed_r}`);
     }, 200);
 });
 
