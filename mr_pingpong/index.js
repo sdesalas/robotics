@@ -173,7 +173,7 @@ board.on('ready', () => {
 
     }, 200);
 
-    process.on('exit', () => {
+    this.on('exit', () => {
         // cleanup
         motor_l.stop();
         motor_r.stop();
