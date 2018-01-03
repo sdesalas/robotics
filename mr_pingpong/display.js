@@ -16,7 +16,7 @@ module.exports = {
         return this;
     },
     value: function (label, suffix) {
-        return new CLI.Line()
+        new CLI.Line()
             .padding(2)
             .column(label, width, [clc.cyan])
             .column(suffix, width * 2)
