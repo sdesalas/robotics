@@ -6,32 +6,33 @@ var history = {};
 var blankLine = new CLI.Line().fill();
 
 module.exports = {
-    gauge: function(label='', value=0, threshold=0, max=1, suffix='') {
+    gauge: function(label, value=0, threshold=0, max=1, suffix) {
         new CLI.Line()
             .padding(2)
-            .column(label, width, [clc.cyan])
-            .column(CLI.Gauge(value, max, 20, threshold || (max * 0.8), suffix || value), 40)
+            .column(String(label), width, [clc.cyan])
+            .column(CLI.Gauge(value, max, 20, threshold || (max * 0.8), String(suffix || value)), 40)
             .fill()
             .output();
         return this;
     },
-    value: function (label='', suffix='') {
+    value: function (label, suffix, color) {
+        color = clc[color] || clc.white;
         new CLI.Line()
             .padding(2)
-            .column(label, width, [clc.cyan])
-            .column(suffix, width * 2)
+            .column(String(label), width * 1.5, [clc.cyan])
+            .column(String(suffix), width * 1.5, [color])
             .fill()
             .output();
         return this;
     },
-    sparkline: function (label='', value=0, suffix='') {
+    sparkline: function (label, value=0, suffix) {
         var series = history[label] = history[label] || [];
         series.push(item.value);
         if (series.length > width) series.shift();
         new CLI.Line()
             .padding(2)
-            .column(label, width, [clc.cyan])
-            .column(CLI.Sparkline(series, suffix || value), width * 4)
+            .column(String(label), width, [clc.cyan])
+            .column(CLI.Sparkline(series, String(suffix || value)), width * 4)
             .fill()
             .output();
         return this;
@@ -43,23 +44,14 @@ module.exports = {
     blank: function() {
         blankLine.output();
         return this;
+    },
+    text: function(label, color) {
+        color = clc[color] || clc.white;
+        new CLI.Line()
+            .padding(2)
+            .column(String(label), String(label).width, [color])
+            .fill()
+            .output();
+        return this;
     }
 };
-
-    /*
-    var total = os.totalmem();
-    var free = os.freemem();
-    var used = total - free;
-    var human = Math.ceil(used / 1000000) + ' MB';
-
-    var memoryLine = new Line()
-        .padding(2)
-        .column('Memory In Use', 20, [clc.cyan])
-        .column(Gauge(used, total, 20, total * 0.8, human), 40)
-        .fill()
-        .output();
-
-    var load = os.loadavg()[0];
-    var maxLoad = os.cpus().length * 2;
-    var danger = os.cpus().length;
-*/

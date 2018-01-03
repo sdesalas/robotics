@@ -40,12 +40,11 @@ board.on('ready', () => {
             network.input('rangefinder (inverted)', 2)(1 - remoteness)
             let learning_rate = 1 - Math.abs(1 - (range / avg_range));
             learning_rate = learning_rate > 1 ? 1 : learning_rate;
-            console.log(`LEARN (DISTANCE): ${learning_rate.toFixed(2)}`);
-            network.learn(learning_rate / 50);
+            learning_rate = learning_rate < -1 ? -1 : learning_rate;
+            learn(learning_rate / 10, 'maintain distance');
         } else {
             // Too close, kick off avoidance reflex and unlearn recent actions
             avoidObstacle();
-            network.unlearn();
         }
     });
 
@@ -57,86 +56,128 @@ board.on('ready', () => {
         if (Math.random() < .5) {
             let learning_rate = -1 * ((light - avg_light) / avg_light);
             learning_rate = learning_rate < -1 ? -1 : learning_rate;
-            console.log(`LEARN (LIGHT): ${learning_rate.toFixed(2)}`);
-            network.learn(learning_rate / 50);
+            learn(learning_rate / 10, 'seek light');
         }
     });
 
     // OUTPUTS
-    let timeout_l, speed_l;
-    let timeout_r, speed_r;
+    let timeout_l, speed_l = 0;
+    let timeout_r, speed_r = 0;
     const motor_l = new five.Motor({ pins: { pwm: 6, dir: 7, }, invertPWM: true, });
     const motor_r = new five.Motor({ pins: { pwm: 9, dir: 8, }, invertPWM: true, });
-    let last_action = 0;
+    let boredom, last_action = new Date().getTime();
+    motor_l.on('stop', () => setTimeout(() => speed_l = 0, 500));
+    motor_r.on('stop', () => setTimeout(() => speed_r = 0, 500));
+
     motor_l.stop();
     motor_r.stop();
 
     network.output('motor_l', 1).on('data', (val) => {
         speed_l = Math.floor(val * 256);
-        if (val < 0.4) {
-            motor_l.stop();
-        } else {
-            last_action = new Date().getTime();
-            motor_l.reverse();
-            clearTimeout(timeout_l);
-            timeout_l = setTimeout(() => motor_l.stop(), val * 2500);
-        }
+        last_action = new Date().getTime();
+        motor_l.reverse(220);
+        clearTimeout(timeout_l);
+        timeout_l = setTimeout(() => motor_l.stop(), val * 2500);
+        learn(boredom, 'act when bored'); // reward movement when bored
     });
     network.output('motor_r', 1).on('data', (val) => {
         speed_r = Math.floor(val * 256);
-        if (val < 0.4) {
-            motor_r.stop();
-        } else {last_action
-            lastActionTime = new Date().getTime();
-            motor_r.reverse();
-            clearTimeout(timeout_r);
-            timeout_r = setTimeout(() => motor_r.stop(), val * 2500);
-        }
+        last_action = new Date().getTime();
+        motor_r.reverse(220);
+        clearTimeout(timeout_r);
+        timeout_r = setTimeout(() => motor_r.stop(), val * 2500);
+        learn(boredom, 'act when bored'); // reward movement when bored
     });
 
+    // LEARN + DISPLAY
+    function learn(rate, reason) {
+        let stars = Math.ceil(Math.abs(rate * 50));
+        if (stars > 20) stars = 20;
+        const color = rate > 0 ? 'green' : 'red';
+        display.value(`LEARN (${reason})`, Array(stars).fill().join('*'), color);
+        network.learn(rate);
+    }
+
     // AVOIDANCE REFLEX (back out from obstacle)
-    let last_avoidance = 0;
+    let bravery = 0, stress = 0, last_avoidance = 0;
     function avoidObstacle() {
-        motor_r.forward(255);
-        last_avoidance = new Date().getTime();
+        speed_r = 255;
+        motor_r.forward(speed_r);
+        last_action = last_avoidance = new Date().getTime();
         setTimeout(() => {
-            motor_l.forward(200);
+            speed_l = 200;
+            motor_l.forward(speed_l);
             motor_r.stop();
             setTimeout(() => motor_l.stop(), 1000);
         }, 1500);
     }
 
     // INPUTS 
-    // 1. Boredom gets higher if there is no recent action
-    // 2. No problems means things are good
+    // 1. boredom gets higher if there is no recent action
+    // 2. No problems means things are good so learn from boredom
     setInterval(() => {
         const now = new Date().getTime();
-        const boredom = (now - last_action) / 30000;
-        network.input('boredom', 2)(boredom > 1 ? 1 : boredom);
-        const no_avoidance = (now - last_avoidance) / 30000;
-        network.learn(no_avoidance > 1 ? 1 : no_avoidance);
+        boredom = (now - last_action) / 30000;
+        boredom = boredom > 1 ? 1 : boredom;
+        stress = 1 - ((now - last_avoidance) / 30000);
+        stress = stress < 0 ? 0 : stress;
+        bravery = 1 - stress;
+        network.input('boredom')(boredom);
+        network.input('stress')(stress);
+        network.input('bravery')(bravery)
+        if (stress > 0.5) {
+            learn((-1 * stress) / 20, 'stress');
+        } else {
+            learn(bravery / 10, 'bravery')
+        }
     }, 200);
 
     // DISPLAY VIA LOCAHOST
-    var visualization = botbrains.Toolkit.visualise(network);
+    const visualization = botbrains.Toolkit.visualise(network);
 
-    console.log(`Network ready for display. Please open http://localhost:${visualization.address().port}`);
+    //console.log(`Network ready for display. Please open http://localhost:${visualization.address().port}`);
+
+    const synapses = network.synapses.length;
 
     setInterval(() => {
-        display
-            .clear()
-            .blank()
-            .value('PHOTO (L)', photo_l.value)
-            .value('PHOTO (R)', photo_r.value)
-            .value('PHOTO (B)', photo_b.value)
-            .gauge('LIGHT', light, avg_light, avg_light*2, `${Math.round(light)}/${Math.round(avg_light)}`)
-            .gauge('RANGE', range, avg_range, avg_range*2, `${Math.round(range)}/${Math.round(avg_range)} cm`)
-            .gauge('MOTOR (L)', speed_l, 140, 256, speed_l)
-            .gauge('MOTOR (R)', speed_r, 140, 256, speed_r)
-            ;
+        botbrains.Toolkit.getStats(stats => {
+            const now = new Date().getTime();
+            const strength = network.strength;
+            const cpu = stats.cpu;
+            const mem = stats.mem;
+            display
+                .clear()
+                .blank()
+                .value('PHOTO (L)', photo_l.value || 0)
+                .value('PHOTO (R)', photo_r.value || 0)
+                .value('PHOTO (B)', photo_b.value || 0)
+                .gauge('DARKNESS', light, avg_light, avg_light*2, `${Math.round(light)}/${Math.round(avg_light)}`)            
+                .blank()
+                .gauge('RANGE', range, avg_range*2, avg_range*2, `${Math.round(range)}/${Math.round(avg_range)} cm`)
+                .blank()
+                .gauge('BOREDOM', boredom, 0.8, 1, `${Math.round(boredom * 100)}%`)
+                .gauge('STRESS', stress, 0.8, 1, `${Math.round((stress) * 100)}%`)
+                .gauge('BRAVERY', bravery, 0.8, 1, `${Math.round((bravery) * 100)}%`)
+                .blank()
+                .gauge('CPU', cpu, 0.8, 1, `${Math.round(cpu * 100)}%`)
+                .gauge('RAM', mem, 0.8, 1, `${Math.round(mem * 100)}%`)
+                .blank()
+                .gauge('MOTOR (L)', speed_l, 140, 256, speed_l)
+                .gauge('MOTOR (R)', speed_r, 140, 256, speed_r)
+                .blank()
+                .gauge('NETWORK STRENGTH', strength, 0.8, 1, `${Math.round(strength * 100)}% active synapses`)
+                .blank()
+                .text('-------------------------------')
+                .blank();
+        });
 
-        //console.log(`L: ${photo_l.value}, R: ${photo_r.value}, B: ${photo_b.value}, LIGHT: RNG: ${Math.round(range)}/${Math.round(avg_range)} => ML: ${speed_l}, MR: ${speed_r}`);
     }, 200);
+
+    process.on('exit', () => {
+        // cleanup
+        motor_l.stop();
+        motor_r.stop();
+    });
 });
 
 
