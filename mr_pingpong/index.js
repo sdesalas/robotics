@@ -38,10 +38,12 @@ board.on('ready', () => {
             const remoteness = range / 1200;
             network.input('rangefinder', 2)(remoteness);
             network.input('rangefinder (inverted)', 2)(1 - remoteness)
-            let learning_rate = 1 - Math.abs(1 - (range / avg_range));
-            learning_rate = learning_rate > 1 ? 1 : learning_rate;
-            learning_rate = learning_rate < -1 ? -1 : learning_rate;
-            learn(learning_rate / 10, 'maintain distance');
+            if (Math.random() < .5) {
+                let learning_rate = 1 - Math.abs(1 - (range / avg_range));
+                learning_rate = learning_rate > 1 ? 1 : learning_rate;
+                learning_rate = learning_rate < -1 ? -1 : learning_rate;
+                learn(learning_rate / 10, 'maintain distance');
+            }
         } else {
             // Too close, kick off avoidance reflex and unlearn recent actions
             avoidObstacle();
@@ -130,7 +132,7 @@ board.on('ready', () => {
         } else {
             learn(bravery / 10, 'bravery')
         }
-    }, 200);
+    }, 500);
 
     // DISPLAY VIA LOCAHOST
     const visualization = botbrains.Toolkit.visualise(network);
