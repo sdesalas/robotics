@@ -173,10 +173,12 @@ board.on('ready', () => {
 
     }, 200);
 
-    this.on('exit', () => {
+    process.stdin.resume();
+    process.on('SIGINT', () => {
         // cleanup
         motor_l.stop();
         motor_r.stop();
+        process.exit();
     });
 });
 
