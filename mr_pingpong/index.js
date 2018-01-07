@@ -38,9 +38,10 @@ board.on('ready', () => {
             // Too close, kick off avoidance reflex and unlearn recent actions
             avoidObstacle();
         }
-        else if (range < 1000) {
-            // Use ranges up to 10m, higher ones are unreliable
-            const remoteness = range / 1000;
+        else {
+            // Use ranges up to 6m, higher ones are unreliable
+            range = range > 600 ? 600 : range;
+            const remoteness = range / 600;
             network.input('rangefinder', 2)(remoteness);
             network.input('rangefinder (inverted)', 2)(1 - remoteness)
             if (Math.random() < .5) {
