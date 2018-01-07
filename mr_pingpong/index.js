@@ -83,7 +83,7 @@ board.on('ready', () => {
         motor_l.reverse(220);
         clearTimeout(timeout_l);
         timeout_l = setTimeout(() => motor_l.stop(), val * 2500);
-        learn(boredom, 'act when bored'); // reward movement when bored
+        if (boredom > 0.2) learn(boredom, 'act when bored'); // reward movement when bored
     });
     network.output('motor_r', 1).on('data', (val) => {
         speed_r = Math.floor(val * 256);
@@ -91,7 +91,7 @@ board.on('ready', () => {
         motor_r.reverse(220);
         clearTimeout(timeout_r);
         timeout_r = setTimeout(() => motor_r.stop(), val * 2500);
-        learn(boredom, 'act when bored'); // reward movement when bored
+        if (boredom > 0.2) learn(boredom, 'act when bored'); // reward movement when bored
     });
 
     // LEARN + DISPLAY
@@ -117,7 +117,7 @@ board.on('ready', () => {
         }, 1500);
     }
 
-    // INPUTS 
+    // FEELINGS
     // 1. boredom gets higher if there is no recent action
     // 2. No problems means things are good so learn from boredom
     setInterval(() => {
@@ -131,7 +131,7 @@ board.on('ready', () => {
         network.input('stress')(stress);
         network.input('bravery')(bravery)
         if (stress > 0.5) {
-            learn((-1 * stress) / 10, 'stress');
+            learn((-1 * stress) / 5, 'stress');
         } else {
             learn(bravery / 5, 'bravery')
         }
