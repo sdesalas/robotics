@@ -29,12 +29,12 @@ board.on('ready', () => {
     });
 
     // INPUT - ultrasound range finder
-    const rangefinder = new five.Proximity({ pin: 2, freq: 100, controller: "HCSR04" });
+    const rangefinder = new five.Proximity({ pin: 2, controller: "HCSR04" });
     let avg_range = 200, range = 200;
     rangefinder.on('data', () => {
         range = (range * 2 + rangefinder.cm) / 3; // moving avg of 3 measurements
         avg_range = (avg_range * 499 + range) / 500; // moving avg of 500 measurements
-        if (range < 1200 && range >= 10) {
+        if (range >= 20) {
             const remoteness = range / 1200;
             network.input('rangefinder', 2)(remoteness);
             network.input('rangefinder (inverted)', 2)(1 - remoteness)
