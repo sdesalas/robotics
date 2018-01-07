@@ -34,8 +34,13 @@ board.on('ready', () => {
     rangefinder.on('data', () => {
         range = (range * 2 + rangefinder.cm) / 3; // moving avg of 3 measurements
         avg_range = (avg_range * 499 + range) / 500; // moving avg of 500 measurements
-        if (range >= 20) {
-            const remoteness = range / 1200;
+        if (range < 20) {
+            // Too close, kick off avoidance reflex and unlearn recent actions
+            avoidObstacle();
+        }
+        else if (range < 1000) {
+            // Use ranges up to 10m, higher ones are unreliable
+            const remoteness = range / 1000;
             network.input('rangefinder', 2)(remoteness);
             network.input('rangefinder (inverted)', 2)(1 - remoteness)
             if (Math.random() < .5) {
@@ -44,9 +49,6 @@ board.on('ready', () => {
                 learning_rate = learning_rate < -1 ? -1 : learning_rate;
                 learn(learning_rate / 10, 'maintain distance');
             }
-        } else {
-            // Too close, kick off avoidance reflex and unlearn recent actions
-            avoidObstacle();
         }
     });
 
