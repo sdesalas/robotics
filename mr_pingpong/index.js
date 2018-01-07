@@ -44,11 +44,11 @@ board.on('ready', () => {
             const remoteness = range / 600;
             network.input('rangefinder', 2)(remoteness);
             network.input('rangefinder (inverted)', 2)(1 - remoteness)
-            if (Math.random() < .5) {
+            if (Math.random() < .2) {
                 let learning_rate = 1 - Math.abs(1 - (range / avg_range));
                 learning_rate = learning_rate > 1 ? 1 : learning_rate;
                 learning_rate = learning_rate < -1 ? -1 : learning_rate;
-                learn(learning_rate / 10, 'maintain distance');
+                learn(learning_rate / 5, 'maintain distance');
             }
         }
     });
@@ -58,10 +58,10 @@ board.on('ready', () => {
     photo_b.on('data', () => {
         light = (light * 2 + (photo_l.value + photo_r.value) / 2) / 3; // moving avg of 2 measurements
         avg_light = (avg_light * 499 + light) / 500; // moving avg of 500 measurements
-        if (Math.random() < .5) {
+        if (Math.random() < .2) {
             let learning_rate = -1 * ((light - avg_light) / avg_light);
             learning_rate = learning_rate < -1 ? -1 : learning_rate;
-            learn(learning_rate / 10, 'seek light');
+            learn(learning_rate / 5, 'seek light');
         }
     });
 
@@ -131,11 +131,11 @@ board.on('ready', () => {
         network.input('stress')(stress);
         network.input('bravery')(bravery)
         if (stress > 0.5) {
-            learn((-1 * stress) / 20, 'stress');
+            learn((-1 * stress) / 10, 'stress');
         } else {
-            learn(bravery / 10, 'bravery')
+            learn(bravery / 5, 'bravery')
         }
-    }, 500);
+    }, 1000);
 
     // DISPLAY VIA LOCAHOST
     const visualization = botbrains.Toolkit.visualise(network);
