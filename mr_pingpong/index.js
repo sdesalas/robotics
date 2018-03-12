@@ -8,7 +8,7 @@ const board = new five.Board({ port: process.argv[2] || ''});
 
 board.on('ready', () => {
 
-    const network = new botbrains.NeuralNetwork(150, { shape: 'tube' });
+    const network = new botbrains.NeuralNetwork(220, { signalSpeed: 10, shape: 'tube' });
 
     // INPUTS - 3 photo-resistors, 2x eyes, 1x back
     const photo_l = new five.Sensor({ pin: 'A0', freq: 100 });
@@ -44,11 +44,11 @@ board.on('ready', () => {
             const remoteness = range / 600;
             network.input('rangefinder', 2)(remoteness);
             network.input('rangefinder (inverted)', 2)(1 - remoteness)
-            if (Math.random() < .2) {
+            if (Math.random() < .1) {
                 let learning_rate = 1 - Math.abs(1 - (range / avg_range));
                 learning_rate = learning_rate > 1 ? 1 : learning_rate;
                 learning_rate = learning_rate < -1 ? -1 : learning_rate;
-                learn(learning_rate / 5, 'maintain distance');
+                learn(learning_rate / 10, 'maintain distance');
             }
         }
     });
