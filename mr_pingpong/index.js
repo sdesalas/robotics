@@ -132,8 +132,9 @@ board.on('ready', () => {
         network.input('bravery')(bravery)
         if (stress > 0.5) {
             learn((-1 * stress) / 5, 'stress');
-        } else {
-            learn(bravery / 5, 'bravery')
+        } 
+        if (boredom > 0.5) {
+            learn((-1 * boredom) / 5, 'boredom')
         }
     }, 1000);
 
