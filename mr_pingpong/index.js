@@ -8,7 +8,7 @@ const board = new five.Board({ port: process.argv[2] || ''});
 
 board.on('ready', () => {
 
-    const network = new botbrains.NeuralNetwork(220, { signalSpeed: 10, shape: 'tube' });
+    const network = new botbrains.NeuralNetwork(220, { signalSpeed: 10 });
 
     // INPUTS - 3 photo-resistors, 2x eyes, 1x back
     const photo_l = new five.Sensor({ pin: 'A0', freq: 100 });
@@ -159,8 +159,8 @@ board.on('ready', () => {
                 .value('PHOTO (L)', photo_l.value || 0)
                 .value('PHOTO (R)', photo_r.value || 0)
                 .value('PHOTO (B)', photo_b.value || 0)
-                .gauge('DARKNESS', light, avg_light, avg_light*2, `${Math.round(light)}/${Math.round(avg_light)}`)            
                 .blank()
+                .gauge('DARKNESS', light, avg_light, avg_light*2, `${Math.round(light)}/${Math.round(avg_light)}`) 
                 .gauge('RANGE', range, avg_range*2, avg_range*2, `${Math.round(range)}/${Math.round(avg_range)} cm`)
                 .blank()
                 .gauge('BOREDOM', boredom, 0.8, 1, `${Math.round(boredom * 100)}%`)
