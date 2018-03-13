@@ -8,7 +8,7 @@ const board = new five.Board({ port: process.argv[2] || ''});
 
 board.on('ready', () => {
 
-    const network = new botbrains.NeuralNetwork(220, { signalSpeed: 10 });
+    const network = new botbrains.NeuralNetwork(120, { signalSpeed: 10 });
 
     // INPUTS - 3 photo-resistors, 2x eyes, 1x back
     const photo_l = new five.Sensor({ pin: 'A0', freq: 100 });
