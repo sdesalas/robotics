@@ -14,6 +14,7 @@
   "dependencies": {
     "botbrains": "git+https://github.com/sdesalas/botbrains.git",
     "clui": "^0.3.6",
-    "johnny-five": "0.11.6"
+    "johnny-five": "0.11.6",
+    "node-wifi-scanner": "^1.0.0"
   }
 }

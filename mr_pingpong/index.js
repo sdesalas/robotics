@@ -1,5 +1,6 @@
 const fs = require('fs');
 const five = require('johnny-five');
+const scanner = require('node-wifi-scanner');
 const botbrains = require('botbrains');
 const EventEmitter = require('events');
 const display = require('./display');
@@ -52,6 +53,21 @@ board.on('ready', () => {
             }
         }
     });
+
+    // INPUT - wifi networks (triangulation)
+    setInterval(() => {
+        scanner.scan((err, networks) => {
+            if (networks && networks.length) {
+                networks.forEach(n => {
+                    if (n.ssid && n.rssi < 0) {
+                        let signal = (n.rssi + 100) / 70;
+                        signal = signal < 0 ? 0 : (signal > 1 ? 1 : signal); 
+                        network.input(n.ssid, signal);
+                    }
+                });
+            }
+        })
+    }, 1000);
 
     // LEARN - Is light increasing? Use this to drive learning.
     let light = 512, avg_light = 512;
