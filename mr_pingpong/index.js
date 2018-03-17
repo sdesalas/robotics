@@ -59,8 +59,9 @@ board.on('ready', () => {
         scanner.scan((err, networks) => {
             if (networks && networks.length) {
                 networks.forEach(n => {
-                    if (n.ssid && n.rssi < 0) {
-                        let signal = (n.rssi + 100) / 70;
+                    const rssi = Math.abs(n.rssi);
+                    if (n.ssid && rssi) {
+                        let signal = (-1*rssi + 100) / 70;
                         signal = signal < 0 ? 0 : (signal > 1 ? 1 : signal); 
                         network.input(n.ssid, signal);
                     }
