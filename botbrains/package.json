@@ -1,0 +1,19 @@
+{
+  "name": "botbrains-demo",
+  "version": "1.0.0",
+  "description": "Various demos and examples for botbrains",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "audio-generator": "^2.1.2",
+    "audio-speaker": "^1.5.0",
+    "botbrains": "^0.5.14",
+    "johnny-five": "^0.14.3",
+    "say": "^0.14.0"
+  }
+}
