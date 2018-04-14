@@ -4,7 +4,7 @@ const scanner = require('node-wifi-scanner');
 
 const board = new five.Board({port: process.argv[2] || '' });
 const network = new botbrains.NeuralNetwork(100);
-botbrains.Toolkit.visualise(brains);
+botbrains.Toolkit.visualise(network);
 
 board.on('ready', () => {
 
