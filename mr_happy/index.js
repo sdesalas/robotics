@@ -146,6 +146,7 @@ board.on('ready', () => {
   function avoidCollission() {
     motors.reverse();
     board.wait(1000, () => {
+      motors.stop();
       if (Math.random() > 0.5) motor_L.reverse();
       else motor_R.reverse();
       board.wait(Math.random() * 3000, () => motors.stop());
