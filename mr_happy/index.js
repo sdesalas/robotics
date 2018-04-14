@@ -121,6 +121,7 @@ board.on('ready', () => {
   ]);
   const motor_L = motors[0];
   const motor_R = motors[1];
+  let avoiding = false;
 
   network.output('motor (L)').on('data', duration => {
     console.log('motor (L)', duration);
@@ -145,11 +146,12 @@ board.on('ready', () => {
 
   function avoidCollission() {
     console.log('avoidCollission!', averageDistance);
+    avoiding = true;
     motors.reverse();
     board.wait(3000, () => {
       if (Math.random() > 0.5) motor_L.stop();
       if (Math.random() > 0.5) motor_R.stop();
-      board.wait(Math.random() * 5000, () => motors.stop());
+      board.wait(Math.random() * 5000, () => motors.stop() && (avoiding = false));
     });
   }
 
