@@ -146,10 +146,10 @@ board.on('ready', () => {
   function avoidCollission() {
     console.log('avoidCollission!', averageDistance);
     motors.reverse();
-    board.wait(2000, () => {
+    board.wait(3000, () => {
       if (Math.random() > 0.5) motor_L.stop();
       if (Math.random() > 0.5) motor_R.stop();
-      board.wait(Math.random() * 4000, () => motors.stop());
+      board.wait(Math.random() * 5000, () => motors.stop());
     });
   }
 
