@@ -89,13 +89,13 @@ board.on('ready', () => {
       brains.learn(lightChange > 1 ? 1 : 
         (lightChange < -1 ? -1 : lightChange));
     }
-    const msSinceCollission = Date.now() - lastCollission;
-    if (msSinceCollission > 10000 && msSinceCollission < 20000) {
-      brains.learn(msSinceCollission - 10000);
-    }
     const msSinceAction = Date.now() - lastAction;
     if (msSinceAction > 10000 && msSinceAction < 20000) {
       brains.unlearn();
+    }
+    const msSinceCollission = Date.now() - lastCollission;
+    if (msSinceCollission > 10000 && msSinceAction > 10000) {
+      brains.learn(msSinceCollission - 10000);
     }
     // Scan Wifi
     scanner.scan((err, networks) => {
