@@ -135,7 +135,7 @@ board.on('ready', () => {
     }
   });
   network.output('motor (R)').on('data', duration => {
-    if (avoding) return;
+    if (avoiding) return;
     console.log('motor (R)', duration);
     motor_R.forward();
     lastAction = Date.now();
@@ -147,7 +147,7 @@ board.on('ready', () => {
   });
 
   function avoidCollission() {
-    if (avoding) return;
+    if (avoiding) return;
     console.log('avoidCollission!', averageDistance);
     avoiding = true;
     motors.reverse();
