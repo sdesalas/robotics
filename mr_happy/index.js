@@ -153,6 +153,8 @@ board.on('ready', () => {
     avoiding = true;
     motors.reverse();
     console.log('REVERSING!');
+    clearTimeout(motor_L.timeout);
+    clearTimeout(motor_R.timeout);
     board.wait(3000, () => {
       console.log('STILL REVERSING!');
       if (Math.random() > 0.5) motor_L.stop();
