@@ -27,27 +27,8 @@ board.on('ready', () => {
     ambientLight = (ambientLight||averageLight) * 99/100 + averageLight * 1/100;
     boredom = (now - lastAction) / 30000;
 
-    process.stdout.write('\033c');
-    console.log("Mr Happy");
-    console.log("  FL            : ", light_FL.value);
-    console.log("  FR            : ", light_FR.value);
-    console.log("  BL            : ", light_BL.value);
-    console.log("  BR            : ", light_BR.value);
-    console.log("  averageLight  : ", averageLight);
-    console.log("  ambientLight  : ", ambientLight);
-    console.log("  RANGE         : ", rangefinder.cm);
-    console.log("  acc.x         : ", sensor.accelerometer.x);
-    console.log("  acc.y         : ", sensor.accelerometer.y);
-    console.log("  acc.z         : ", sensor.accelerometer.z);
-    console.log("  mag.x         : ", sensor.magnetometer.raw.x);
-    console.log("  mag.y         : ", sensor.magnetometer.raw.y);
-    console.log("  mag.z         : ", sensor.magnetometer.raw.z);
-    console.log("  boredom       : ", boredom);
-    console.log("--------------------------------------");
-
     averageLight = light_FL.value/4 + light_FR.value/4 + light_BL.value/4 + light_BR.value/4;
-    averageDistance = (averageDistance||100)*3/4 + rangefinder.cm/4;
-
+    averageDistance = (averageDistance||100)*2/3 + rangefinder.cm/3;
 
     // Light/Range
     brains.input('Light Front/Left')((light_FL - ambientLight) / 512);
@@ -75,6 +56,24 @@ board.on('ready', () => {
 
   // Every 200ms
   setInterval(() => {
+    process.stdout.write('\033c');
+    console.log("Mr Happy");
+    console.log("  FL            : ", light_FL.value);
+    console.log("  FR            : ", light_FR.value);
+    console.log("  BL            : ", light_BL.value);
+    console.log("  BR            : ", light_BR.value);
+    console.log("  averageLight  : ", averageLight);
+    console.log("  ambientLight  : ", ambientLight);
+    console.log("  averageDistance : ", averageDistance);
+    console.log("  acc.x         : ", sensor.accelerometer.x);
+    console.log("  acc.y         : ", sensor.accelerometer.y);
+    console.log("  acc.z         : ", sensor.accelerometer.z);
+    console.log("  mag.x         : ", sensor.magnetometer.raw.x);
+    console.log("  mag.y         : ", sensor.magnetometer.raw.y);
+    console.log("  mag.z         : ", sensor.magnetometer.raw.z);
+    console.log("  boredom       : ", boredom);
+    console.log("--------------------------------------");
+
     if (averageDistance < 20) {
       avoidCollission();
       lastCollission = Date.now();
@@ -86,15 +85,18 @@ board.on('ready', () => {
   setInterval(() => {
     const lightChange = averageLight - ambientLight / ambientLight;
     if (Math.abs(lightChange) > 0.05) {
+      console.log('LEARN (lightChange)', lightChange);
       brains.learn(lightChange > 1 ? 1 : 
         (lightChange < -1 ? -1 : lightChange));
     }
     const msSinceAction = Date.now() - lastAction;
     if (msSinceAction > 10000 && msSinceAction < 20000) {
+      console.log('UNLEARN (msSinceAction)', msSinceAction);
       brains.unlearn();
     }
     const msSinceCollission = Date.now() - lastCollission;
     if (msSinceCollission > 10000 && msSinceAction > 10000) {
+      console.log('LEARN (msSinceCollission)', msSinceCollission);
       brains.learn(msSinceCollission - 10000);
     }
     // Scan Wifi
@@ -121,6 +123,7 @@ board.on('ready', () => {
   const motor_R = motors[1];
 
   brains.output('motor (L)').on('data', duration => {
+    console.log('motor (L)', duration);
     motor_L.forward();
     clearTimeout(motor_L.timeout);
     lastAction = Date.now();
@@ -130,6 +133,7 @@ board.on('ready', () => {
     }
   });
   brains.output('motor (R)').on('data', duration => {
+    console.log('motor (R)', duration);
     motor_R.forward();
     lastAction = Date.now();
     clearTimeout(motor_R.timeout);
