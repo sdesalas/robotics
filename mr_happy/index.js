@@ -131,7 +131,7 @@ board.on('ready', () => {
     motor_L.forward();
     clearTimeout(motor_L.timeout);
     lastAction = Date.now();
-    motor_L.timeout = setTimeout(() => motor_L.stop(), duration * 5000);
+    motor_L.timeout = setTimeout(() => !avoiding && motor_L.stop(), duration * 5000);
     if (boredom > 0.25) {
       network.learn(boredom);
     }
@@ -142,7 +142,7 @@ board.on('ready', () => {
     motor_R.forward();
     lastAction = Date.now();
     clearTimeout(motor_R.timeout);
-    motor_R.timeout = setTimeout(() => motor_R.stop(), duration * 5000);
+    motor_R.timeout = setTimeout(() => !avoiding && motor_R.stop(), duration * 5000);
     if (boredom > 0.25) {
       network.learn(boredom);
     }
