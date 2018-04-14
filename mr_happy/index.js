@@ -3,7 +3,7 @@ const botbrains = require('botbrains');
 const scanner = require('node-wifi-scanner');
 
 const board = new five.Board({port: process.argv[2] || '' });
-const brains = new botbrains.NeuralNetwork(100);
+const network = new botbrains.NeuralNetwork(100);
 botbrains.Toolkit.visualise(brains);
 
 board.on('ready', () => {
@@ -31,26 +31,26 @@ board.on('ready', () => {
     averageDistance = (averageDistance||100)*2/3 + rangefinder.cm/3;
 
     // Light/Range
-    brains.input('Light Front/Left')((light_FL - ambientLight) / 512);
-    brains.input('Light Front/Right')((light_FR - ambientLight) / 512);
-    brains.input('Light Back/Left')((light_BL - ambientLight) / 512);
-    brains.input('Light Back/Right')((light_BR - ambientLight) / 512);
-    brains.input('Range Proximity')((200 - averageDistance) / 200);
+    network.input('Light Front/Left')((light_FL - ambientLight) / 512);
+    network.input('Light Front/Right')((light_FR - ambientLight) / 512);
+    network.input('Light Back/Left')((light_BL - ambientLight) / 512);
+    network.input('Light Back/Right')((light_BR - ambientLight) / 512);
+    network.input('Range Proximity')((200 - averageDistance) / 200);
 
     // Compass
-    brains.input('North')(compass.x);
-    brains.input('South')(-1*compass.x);
-    brains.input('East')(compass.y);
-    brains.input('West')(-1*compass.y);
+    network.input('North')(compass.x);
+    network.input('South')(-1*compass.x);
+    network.input('East')(compass.y);
+    network.input('West')(-1*compass.y);
 
     // Wifi telemetry
     Object.keys(wifi).forEach(ssid => 
       (now - wifi[ssid].time < 10000) ?
-        brains.input(`wifi (${ssid})`)(wifi[ssid].signal) : false
+      network.input(`wifi (${ssid})`)(wifi[ssid].signal) : false
     );
 
     // Boredom
-    brains.input('boredom')(boredom);
+    network.input('boredom')(boredom);
     
   }, 100);
 
@@ -77,7 +77,7 @@ board.on('ready', () => {
     if (averageDistance < 20) {
       avoidCollission();
       lastCollission = Date.now();
-      brains.unlearn(.2);
+      network.unlearn(.2);
     } 
   }, 200);
 
@@ -86,18 +86,18 @@ board.on('ready', () => {
     const lightChange = (averageLight - ambientLight) / ambientLight;
     if (Math.abs(lightChange) > 0.05) {
       console.log('LEARN (lightChange)', lightChange);
-      brains.learn(lightChange > 1 ? 1 : 
+      network.learn(lightChange > 1 ? 1 : 
         (lightChange < -1 ? -1 : lightChange));
     }
     const msSinceAction = Date.now() - lastAction;
     if (msSinceAction > 10000 && msSinceAction < 20000) {
       console.log('UNLEARN (msSinceAction)', msSinceAction);
-      brains.unlearn();
+      network.unlearn();
     }
     const msSinceCollission = Date.now() - lastCollission;
     if (msSinceCollission > 10000 && msSinceAction > 10000) {
       console.log('LEARN (msSinceCollission)', msSinceCollission);
-      brains.learn(msSinceCollission - 10000);
+      network.learn(msSinceCollission - 10000);
     }
     // Scan Wifi
     scanner.scan((err, networks) => {
@@ -122,7 +122,7 @@ board.on('ready', () => {
   const motor_L = motors[0];
   const motor_R = motors[1];
 
-  brains.output('motor (L)').on('data', duration => {
+  network.output('motor (L)').on('data', duration => {
     console.log('motor (L)', duration);
     motor_L.forward();
     clearTimeout(motor_L.timeout);
@@ -132,7 +132,7 @@ board.on('ready', () => {
       network.learn(boredom);
     }
   });
-  brains.output('motor (R)').on('data', duration => {
+  network.output('motor (R)').on('data', duration => {
     console.log('motor (R)', duration);
     motor_R.forward();
     lastAction = Date.now();
