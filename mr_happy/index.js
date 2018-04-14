@@ -148,7 +148,7 @@ board.on('ready', () => {
     motors.reverse();
     board.wait(2000, () => {
       if (Math.random() > 0.5) motor_L.stop();
-      else motor_R.stop();
+      if (Math.random() > 0.5) motor_R.stop();
       board.wait(Math.random() * 4000, () => motors.stop());
     });
   }
