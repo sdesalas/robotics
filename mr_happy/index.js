@@ -16,12 +16,16 @@ board.on('ready', () => {
   const rangefinder = new five.Proximity({ pin: 2, freq: 100, controller: "HCSR04" });
   const wifi = {};
 
-  let ambientLight, averageLight, averageDistance, lastCollission;
+  let ambientLight, averageLight, averageDistance, lastCollission, lastAction, boredom;
 
   setInterval(() => {
 
+    const compass = sensor.magnetometer.raw; 
+    const now = Date.now(); 
+
     // Average over 100 measurements (10 seconds)
     ambientLight = (ambientLight||averageLight) * 99/100 + averageLight * 1/100;
+    boredom = (now - lastAction) / 30000;
 
     process.stdout.write('\033c');
     console.log("Mr Happy");
@@ -38,13 +42,14 @@ board.on('ready', () => {
     console.log("  mag.x         : ", sensor.magnetometer.raw.x);
     console.log("  mag.y         : ", sensor.magnetometer.raw.y);
     console.log("  mag.z         : ", sensor.magnetometer.raw.z);
+    console.log("  boredom       : ", boredom);
     console.log("--------------------------------------");
 
     averageLight = light_FL.value/4 + light_FR.value/4 + light_BL.value/4 + light_BR.value/4;
     averageDistance = (averageDistance||100)*3/4 + rangefinder.cm/4;
-    const compass = sensor.magnetometer.raw; 
-    const now = Date.now(); 
 
+
+    // Light/Range
     brains.input('Light Front/Left')((light_FL - ambientLight) / 512);
     brains.input('Light Front/Right')((light_FR - ambientLight) / 512);
     brains.input('Light Back/Left')((light_BL - ambientLight) / 512);
@@ -62,6 +67,9 @@ board.on('ready', () => {
       (now - wifi[ssid].time < 10000) ?
         brains.input(`wifi (${ssid})`)(wifi[ssid].signal) : false
     );
+
+    // Boredom
+    brains.input('boredom')(boredom);
     
   }, 100);
 
@@ -84,6 +92,10 @@ board.on('ready', () => {
     const msSinceCollission = Date.now() - lastCollission;
     if (msSinceCollission > 10000 && msSinceCollission < 20000) {
       brains.learn(msSinceCollission - 10000);
+    }
+    const msSinceAction = Date.now() - lastAction;
+    if (msSinceAction > 10000 && msSinceAction < 20000) {
+      brains.unlearn();
     }
     // Scan Wifi
     scanner.scan((err, networks) => {
@@ -111,12 +123,20 @@ board.on('ready', () => {
   brains.output('motor (L)').on('data', duration => {
     motor_L.forward();
     clearTimeout(motor_L.timeout);
+    lastAction = Date.now();
     motor_L.timeout = setTimeout(() => motor_L.stop(), duration * 1000);
+    if (boredom > 0.25) {
+      network.learn(boredom);
+    }
   });
   brains.output('motor (R)').on('data', duration => {
     motor_R.forward();
+    lastAction = Date.now();
     clearTimeout(motor_R.timeout);
     motor_R.timeout = setTimeout(() => motor_R.stop(), duration * 1000);
+    if (boredom > 0.25) {
+      network.learn(boredom);
+    }
   });
 
   function avoidCollission() {
