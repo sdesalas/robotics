@@ -1,0 +1,17 @@
+{
+  "name": "@sdesalas/mr_happy",
+  "version": "1.0.0",
+  "description": "Mr Happy the Happy Robot",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "botbrains": "^0.5.16",
+    "johnny-five": "^0.14.3",
+    "node-wifi-scanner": "^1.0.0"
+  }
+}
