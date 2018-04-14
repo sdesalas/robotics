@@ -1,16 +1,16 @@
 #define ROBOT_NAME "DeSaladBot"
 
 // If you haven't configured your device before use this
-#define BLUETOOTH_SPEED 57600
+//#define BLUETOOTH_SPEED 9600
 // If you are modifying your existing configuration, use this:
-// #define BLUETOOTH_SPEED 57600
+ #define BLUETOOTH_SPEED 57600
 
 #include <SoftwareSerial.h>
 
 // Swap RX/TX connections on bluetooth chip
 //   Pin 10 --> Bluetooth TX
 //   Pin 11 --> Bluetooth RX
-SoftwareSerial mySerial(10, 11); // RX, TX
+SoftwareSerial mySerial(10, 15); // RX, TX
 
 
 /*

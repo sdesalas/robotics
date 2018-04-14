@@ -80,6 +80,6 @@ I had an idea to build a nodebot with some sensors and plug them into a [neural 
 
 I found a discarded cardboard teabox with a nice pattern on it and I cut out some holes for the wheels, then added the rest of the guts including some photo-sensors and a HCSR04 ultransonic range finder. 
 
-The robot was 'alive' in the sense that all data was being sent to a neural network that processed it and fed commands to the motors, reinforcing all recent actions that increased the exposure to light. 
+The robot was 'alive' in the sense that all data was being sent to a neural network that processed it and fed commands to the motors, reinforcing all recent actions that increased the exposure to light and distance from obstacles. 
 
-In other words, a 'light-seeking' robot. The code can be found [here](mr_pingpong/index.js).
+In other words, a 'light-seeking' and 'obstacle-avoiding' robot. The code can be found [here](mr_pingpong/index.js).
