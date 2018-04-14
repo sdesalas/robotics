@@ -144,6 +144,7 @@ board.on('ready', () => {
   });
 
   function avoidCollission() {
+    console.log('avoidCollission!', averageDistance);
     motors.reverse();
     board.wait(1000, () => {
       if (Math.random() > 0.5) motor_L.stop();
