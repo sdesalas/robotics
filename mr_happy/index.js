@@ -151,19 +151,21 @@ board.on('ready', () => {
   function avoidCollission() {
     if (avoiding) return;
     avoiding = true;
-    motors.stop();
-    motors.reverse();
     console.log('REVERSING!');
+    motors.stop();
     clearTimeout(motor_L.timeout);
     clearTimeout(motor_R.timeout);
-    board.wait(3000, () => {
-      console.log('STILL REVERSING!');
-      if (Math.random() > 0.5) motor_L.stop();
-      if (Math.random() > 0.5) motor_R.stop();
-      board.wait(Math.random() * 5000, () => {
-        console.log('STOP REVERSING!');
-        motors.stop();
-        avoiding = false;
+    board.wait(100, () => {
+      motors.reverse();
+      board.wait(3000, () => {
+        console.log('STILL REVERSING!');
+        if (Math.random() > 0.5) motor_L.stop();
+        if (Math.random() > 0.5) motor_R.stop();
+        board.wait(Math.random() * 5000, () => {
+          console.log('STOP REVERSING!');
+          motors.stop();
+          avoiding = false;
+        });
       });
     });
   }
