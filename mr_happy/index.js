@@ -83,7 +83,7 @@ board.on('ready', () => {
 
   // Every 1s
   setInterval(() => {
-    const lightChange = averageLight - ambientLight / ambientLight;
+    const lightChange = (averageLight - ambientLight) / ambientLight;
     if (Math.abs(lightChange) > 0.05) {
       console.log('LEARN (lightChange)', lightChange);
       brains.learn(lightChange > 1 ? 1 : 
