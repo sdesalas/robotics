@@ -151,6 +151,7 @@ board.on('ready', () => {
   function avoidCollission() {
     if (avoiding) return;
     avoiding = true;
+    motors.stop();
     motors.reverse();
     console.log('REVERSING!');
     clearTimeout(motor_L.timeout);
