@@ -56,6 +56,8 @@ board.on('ready', () => {
 
   // Every 200ms
   setInterval(() => {
+    if (avoiding) return;
+
     process.stdout.write('\033c');
     console.log("Mr Happy");
     console.log("  FL            : ", light_FL.value);
@@ -129,7 +131,7 @@ board.on('ready', () => {
     motor_L.forward();
     clearTimeout(motor_L.timeout);
     lastAction = Date.now();
-    motor_L.timeout = setTimeout(() => motor_L.stop(), duration * 2000);
+    motor_L.timeout = setTimeout(() => motor_L.stop(), duration * 5000);
     if (boredom > 0.25) {
       network.learn(boredom);
     }
@@ -140,7 +142,7 @@ board.on('ready', () => {
     motor_R.forward();
     lastAction = Date.now();
     clearTimeout(motor_R.timeout);
-    motor_R.timeout = setTimeout(() => motor_R.stop(), duration * 2000);
+    motor_R.timeout = setTimeout(() => motor_R.stop(), duration * 5000);
     if (boredom > 0.25) {
       network.learn(boredom);
     }
@@ -148,13 +150,18 @@ board.on('ready', () => {
 
   function avoidCollission() {
     if (avoiding) return;
-    console.log('avoidCollission!', averageDistance);
     avoiding = true;
     motors.reverse();
+    console.log('REVERSING!');
     board.wait(3000, () => {
+      console.log('STILL REVERSING!');
       if (Math.random() > 0.5) motor_L.stop();
       if (Math.random() > 0.5) motor_R.stop();
-      board.wait(Math.random() * 5000, () => motors.stop() && (avoiding = false));
+      board.wait(Math.random() * 5000, () => {
+        console.log('STOP REVERSING!');
+        motors.stop();
+        avoiding = false;
+      });
     });
   }
 
