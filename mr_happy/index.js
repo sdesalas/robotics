@@ -3,16 +3,16 @@ const botbrains = require('botbrains');
 const scanner = require('node-wifi-scanner');
 
 const board = new five.Board({port: process.argv[2] || '' });
-const network = new botbrains.NeuralNetwork(100);
+const network = new botbrains.NeuralNetwork(600, { shape: 'sausage', signalSpeed: 10 });
 botbrains.Toolkit.visualise(network);
 
 board.on('ready', () => {
 
   const sensor = new five.IMU({ controller: "LSM303C", freq: 100 });
-  const light_FL = new five.Sensor({ pin: 'A0',  freq: 100, threshold: 5 });
-  const light_BL = new five.Sensor({ pin: 'A1',  freq: 100, threshold: 5 });
-  const light_BR = new five.Sensor({ pin: 'A2',  freq: 100, threshold: 5 });
-  const light_FR = new five.Sensor({ pin: 'A3',  freq: 100, threshold: 5 });
+  const light_BL = new five.Sensor({ pin: 'A0',  freq: 100, threshold: 5 });
+  const light_BR = new five.Sensor({ pin: 'A1',  freq: 100, threshold: 5 });
+  const light_FR = new five.Sensor({ pin: 'A2',  freq: 100, threshold: 5 });
+  const light_FL = new five.Sensor({ pin: 'A3',  freq: 100, threshold: 5 });
   const rangefinder = new five.Proximity({ pin: 2, freq: 100, controller: "HCSR04" });
   const wifi = {};
 
@@ -28,14 +28,14 @@ board.on('ready', () => {
     boredom = (now - lastAction) / 30000;
 
     averageLight = light_FL.value/4 + light_FR.value/4 + light_BL.value/4 + light_BR.value/4;
-    averageDistance = (averageDistance||100)*2/3 + rangefinder.cm/3;
+    averageDistance = (averageDistance||100)/2 + rangefinder.cm/2;
 
     // Light/Range
     network.input('Light Front/Left')((light_FL - ambientLight) / 512);
     network.input('Light Front/Right')((light_FR - ambientLight) / 512);
     network.input('Light Back/Left')((light_BL - ambientLight) / 512);
     network.input('Light Back/Right')((light_BR - ambientLight) / 512);
-    network.input('Range Proximity')((200 - averageDistance) / 200);
+    network.input('Range Proximity', 4)((200 - averageDistance) / 200);
 
     // Compass
     network.input('North')(compass.x);
@@ -56,7 +56,6 @@ board.on('ready', () => {
 
   // Every 200ms
   setInterval(() => {
-    if (avoiding) return;
 
     process.stdout.write('\033c');
     console.log("Mr Happy");
@@ -70,13 +69,14 @@ board.on('ready', () => {
     console.log("  acc.x         : ", sensor.accelerometer.x);
     console.log("  acc.y         : ", sensor.accelerometer.y);
     console.log("  acc.z         : ", sensor.accelerometer.z);
+    console.log("  acc.total     : ", sensor.accelerometer.acceleration);
     console.log("  mag.x         : ", sensor.magnetometer.raw.x);
     console.log("  mag.y         : ", sensor.magnetometer.raw.y);
     console.log("  mag.z         : ", sensor.magnetometer.raw.z);
     console.log("  boredom       : ", boredom);
     console.log("--------------------------------------");
 
-    if (averageDistance < 20) {
+    if (averageDistance < 20 && !avoiding) {
       avoidCollission();
       lastCollission = Date.now();
       network.unlearn(.2);
@@ -128,7 +128,7 @@ board.on('ready', () => {
   network.output('motor (L)').on('data', duration => {
     if (avoiding) return;
     console.log('motor (L)', duration);
-    motor_L.forward();
+    motor_L.forward(180);
     clearTimeout(motor_L.timeout);
     lastAction = Date.now();
     motor_L.timeout = setTimeout(() => motor_L.stop(), duration * 2000);
@@ -139,7 +139,7 @@ board.on('ready', () => {
   network.output('motor (R)').on('data', duration => {
     if (avoiding) return;
     console.log('motor (R)', duration);
-    motor_R.forward();
+    motor_R.forward(180);
     lastAction = Date.now();
     clearTimeout(motor_R.timeout);
     motor_R.timeout = setTimeout(() => motor_R.stop(), duration * 2000);
@@ -151,26 +151,22 @@ board.on('ready', () => {
   function avoidCollission() {
     if (avoiding) return;
     avoiding = true;
-    console.log('REVERSING!');
     motors.stop();
     clearTimeout(motor_L.timeout);
     clearTimeout(motor_R.timeout);
-    board.wait(100, () => {
-      motors.reverse();
-      board.wait(1000, () => {
-        console.log('STILL REVERSING!');
-        if (Math.random() > 0.5) motor_L.stop();
-        if (Math.random() > 0.5) motor_R.stop();
-        board.wait(Math.random() * 3000, () => {
-          console.log('STOP REVERSING!');
-          motors.stop();
-          avoiding = false;
-        });
-      });
-    });
+    motors.reverse(210);
+    setTimeout(() => {
+      if (Math.random() < 0.5) motor_L.stop();
+      else motor_R.stop();
+      setTimeout(() => {
+        motors.stop();
+        avoiding = false;
+      }, Math.random() * 2000);
+    }, 1000);
   }
 
   board.on('exit', () => motors.stop());
   process.on('exit', () => motors.stop());
+  board.on('error', e => (console.log(err) || process.exit()));
 
 });
