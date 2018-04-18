@@ -4,7 +4,7 @@ const sound = require('./sound');
 const say = require('say');
 
 
-const network = new botbrains.NeuralNetwork(200, { shape: 'ball', learningPeriod: 6000, signalSpeed: 10 });
+const network = new botbrains.NeuralNetwork(120, { shape: 'sausage', learningPeriod: 6000, signalSpeed: 10 });
 botbrains.Toolkit.visualise(network);
 
 const input1 = network.input('input1');
@@ -23,7 +23,7 @@ setInterval(() => {
     words = [];
     console.log('----------------');
     if (Date.now() - lastWord > 5000) {
-        network.unlearn(0.01);
+        network.unlearn();
     }
 }, 1000);
 

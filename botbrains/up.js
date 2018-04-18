@@ -31,7 +31,7 @@ board.on('ready', () => {
                 z = sensor.accelerometer.z,
                 acceleration = sensor.accelerometer.acceleration;
 
-            // process.stdout.write('\033c');
+            //process.stdout.write('\033c');
             // console.log("Accelerometer");
             // console.log("  x            : ", x);
             // console.log("  y            : ", y);
@@ -73,7 +73,7 @@ board.on('ready', () => {
             network.learn();
         } else {
             console.log(word + ': NOT GOOD!');
-            network.unlearn(.5);
+            network.unlearn();
         }
     }
 
