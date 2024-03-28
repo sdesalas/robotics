@@ -1,4 +1,9 @@
-/* Multiple DS18B20 1-Wire digital temperature sensors with Arduino example code. More info: https://www.makerguides.com */
+/* Multiple DS18B20 1-Wire digital temperature sensors with Arduino. Example code and more info: https://www.makerguides.com */
+// For use with Sparkfan Pro Micro 5V 18Mhz
+// Pin 5 = OneWire protocol, 2 DS18B20 temp sensors, 10K Ohm Pullup resistor.
+// Pin 4 = 220V Relay signal
+// Pin 3 = I2C LCD (SCL)
+// Pin 2 = I2C LCD (SCA)
 
 // Include the required Arduino libraries:
 #include "OneWire.h"
@@ -39,11 +44,12 @@ void setup() {
   // Start up the library:
   sensors.begin();
   // Locate the devices on the bus:
-  println("Locating devices...");
-  print("Found ");
+  println("Locating devices.");
+  print("-> ");
   deviceCount = sensors.getDeviceCount();
   print(deviceCount);
-  println(" devices");
+  print(" devices");
+  delay(2000);
 }
 
 void loop() {
@@ -86,7 +92,7 @@ void loop() {
   }
   // No? Then turn fan off.
   else {
-    if (USE_SERIAL) print("Same same.");
+    printserial("Same same.");
     digitalWrite(FAN, 0);
     printOFF();
   }
@@ -113,17 +119,23 @@ void print(float val) {
 
 void println(String msg) {
   if (USE_SERIAL) Serial.println(msg);
-  if (USE_DISPLAY) lcd.println(msg);
+  if (USE_DISPLAY) {
+    lcd.println(msg);
+    lcd.setCursor(0,1);
+  }
 }
 
 void println(int val) {
   if (USE_SERIAL) Serial.println(val); 
-  if (USE_DISPLAY) lcd.println(val);
+  if (USE_DISPLAY) {
+    lcd.println(val);
+    lcd.setCursor(0,1);
+  }
 }
 
 void println() {
   if (USE_SERIAL) Serial.println();
-  if (USE_DISPLAY) lcd.setCursor(0,0);
+  if (USE_DISPLAY) lcd.setCursor(0,1);
 }
 
 void printserial(String msg) {
