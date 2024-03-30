@@ -34,3 +34,16 @@ This is a climate control circuit to use external temperature to modulate indoor
 <img src="lcd.front.png" width="400"/>
 <img src="lcd.back.png" width="400"/>
 
+# Hookup (LCD)
+
+Its much easier to setup an LCD using I2C, using 2 data cables instead of 6. 
+
+<img src="sensor-lcd.png" width="500"/>
+
+# Hookup (Multi Sensor)
+
+Using the "OneWire" protocol its possible to hook up multiple sensors on the same signal line.
+
+<img src="multi-sensor.png" width="500"/>
+
+
