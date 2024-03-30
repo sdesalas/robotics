@@ -2,7 +2,7 @@
 
 This is a climate control circuit to use external temperature to modulate indoor temperature.
 
-![diagram.explanation.png](diagram.explanation.png)
+<img src="diagram.explanation.png" width="500"/>
 
 # Components
 
