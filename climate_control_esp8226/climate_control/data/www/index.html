@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Climate Control</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+      body {
+        max-width: 900px;
+        margin: 0 auto;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      canvas {
+        margin-bottom: 40px;
+      }
+
+      @media (max-width: 600px) {
+        canvas {
+          width: 100%;
+          height: 300px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+  <p><img src="fan.jpg" style="display: block; width: 120px; margin: 0 auto"/></p>
+  <h1>Climate Control</h1>
+  <div class="banner">
+    <dl class="box-green"><dt>Inside</dt><dd>21.4&deg;C</dd></dl>
+    <dl class="box-blue"><dt>Outside</dt><dd>17.8&deg;C</dd></dl>
+    <dl class="box-red"><dt>Fan</dt><dd>OFF</dd></dl>
+  </div>
+  <div>
+    <canvas id="chart48h" style="height: 300px"></canvas>
+    <canvas id="chart7d" style="height: 300px"></canvas>
+  </div>
+  <footer>By Steven de Salas</footer>
+  <script src="chart-4.4.2.js"></script>
+  <script src="chart-adapter-date-fns.js"></script>
+	<script src="script48h.js"></script>
+  <script src="script7d.js"></script>
+  </body>
+</html>

@@ -1,0 +1,62 @@
+
+
+h1 {
+  font-size: 120%;
+  text-align: center;
+  padding: 0;
+  margin: -1em 0 1.5em;
+}
+
+.banner {
+  display: flex;
+  justify-content: space-around;
+  text-align: center;
+  margin: 1em 0 1.5em;
+}
+dl, dd, dt {
+  margin: 0;
+  padding: 0;
+}
+.banner dl {
+  width: 28%;
+}
+.banner dd {
+  font-size: 24pt;
+  font-weight: bold;
+}
+.banner .box-green {
+  padding: 3px 10px;
+  background: #308230;
+  color: white;
+}
+.banner .box-blue {
+  padding: 3px 10px;
+  background: #234b96;
+  color: white;
+}
+.banner .box-red {
+  padding: 3px 10px;
+  background: #c32424;
+  color: white;
+}
+
+.banner .box-red.disabled {
+  background: #999;
+}
+.banner .box-red.disabled dd {
+  visibility: hidden;
+  font-size: 1pt;
+}
+.banner .box-red.disabled dd:before {
+  display: block;
+  font-size: 22pt;
+  visibility: visible;
+  content: 'DISABLED';
+}
+
+footer {
+  text-align: center;
+  font-size: small;
+  color: #999;
+  margin-bottom: 2em;
+}
