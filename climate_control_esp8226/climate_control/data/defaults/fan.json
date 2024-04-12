@@ -1,0 +1,6 @@
+{
+  "enabled": true,
+  "cold": 20,
+  "hot": 25,
+  "buffer": 2
+}

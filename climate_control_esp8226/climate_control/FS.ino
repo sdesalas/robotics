@@ -48,3 +48,30 @@ void FS_listDirectory(const char * dirname, int depth, int level) {
     }
   }
 }
+
+JsonDocument FS_readJson(const char * path) {
+  Serial.print("Reading JSON from ");
+  Serial.println(path);
+  JsonDocument doc;
+  File file = LittleFS.open(path, "r");
+  if (!file) {
+    Serial.println("That file does not exist!");
+  } else {
+    deserializeJson(doc, file);
+  }
+  file.close();
+  serializeJson(doc, Serial);
+  Serial.println();
+  return doc;
+}
+
+bool FS_writeJson(const char * path, const JsonVariant json) {
+  Serial.print("Writing JSON to ");
+  Serial.println(path);
+  serializeJson(json, Serial);
+  Serial.println();
+  File file = LittleFS.open(path, "w");
+  size_t bytes = serializeJsonPretty(json, file);
+  file.close();
+  return bytes > 0;
+}

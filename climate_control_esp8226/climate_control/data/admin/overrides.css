@@ -1,0 +1,43 @@
+:root {
+  --pico-form-element-spacing-vertical: 8pt;
+  --pico-nav-element-spacing-vertical: 8pt;
+  --pico-form-element-background-color: #fefff6 !important;
+}
+button {
+  --pico-form-element-spacing-vertical: 6pt;   
+}
+nav ul {
+  border-bottom: 1px solid #ccc;
+  margin: 1em 0 !important;
+  width: 100%;
+}
+nav ul li {
+  padding: var(--pico-nav-element-spacing-vertical) calc(var(--pico-nav-element-spacing-horizontal)* 2);
+  cursor: pointer;
+  background: #f7f7f7;
+  border-bottom: 2px solid #eee;
+  margin-right: 3px;
+}
+nav ul li.active {
+  background-color: #cad9e2;
+  border-bottom: 2px solid var(--pico-primary-background);
+  color: black;
+}
+button {
+  width: 100%;
+  margin-bottom: calc(var(--pico-form-element-spacing-vertical)*2);
+}
+button.red {
+  background-color: #bf220d;
+  border: 1px solid #bf220d;
+}
+button.lightgrey {
+  background-color: #ccc;
+  border: 1px solid #ccc;
+  color: #333;
+}
+button.darkgrey {
+  background-color: #666;
+  border: 1px solid #666;
+  color: #eee;
+}
