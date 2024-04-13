@@ -15,11 +15,11 @@ nav ul li {
   padding: var(--pico-nav-element-spacing-vertical) calc(var(--pico-nav-element-spacing-horizontal)* 2);
   cursor: pointer;
   background: #f7f7f7;
-  border-bottom: 2px solid #eee;
+  border-bottom: 2px solid #ddd;
   margin-right: 3px;
 }
 nav ul li.active {
-  background-color: #cad9e2;
+  background-color: #d9e3e9;
   border-bottom: 2px solid var(--pico-primary-background);
   color: black;
 }

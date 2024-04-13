@@ -1,3 +1,4 @@
 {
-  "ota": false
+  "ota": false,
+  "key": "key"
 }
