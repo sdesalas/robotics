@@ -1,11 +1,10 @@
-#include <Ticker.h>
 
-DNSServer dnsServer;
+// DNSServer dnsServer;
 IPAddress APIP(192, 168, 6, 1); // Gateway
 
-const byte DNS_PORT = 53;
+// const byte DNS_PORT = 53;
 
-Ticker dnsTicker;
+// Ticker dnsTicker;
 Ticker blinker;
 
 void Wifi_init() {
@@ -16,15 +15,18 @@ void Wifi_init() {
   WiFi.mode(WIFI_AP);
   WiFi.softAPConfig(APIP, APIP, IPAddress(255, 255, 255, 0));
   WiFi.softAP(ssid, password);
-  Serial.println("AP Created! Setting up DNS");
+  // Serial.println("AP Created! Setting up DNS");
   // DNS spoofing (Only for HTTP)
-  dnsServer.start(DNS_PORT, "*", APIP);
+  //dnsServer.start(DNS_PORT, "*", APIP);
   // Check DNS redirect every 100 ms
-  dnsTicker.attach_ms(100, []() {
-    dnsServer.processNextRequest();
-  });
+  // dnsTicker.attach_ms(100, []() {
+  //   dnsServer.processNextRequest();
+  // });
   // Blink every 5 seconds
-  blinker.attach_ms(5000, []() {
+  blinker.attach_ms_scheduled(5005, []() {
+    Serial.print("ESP.getFreeHeap(): ");
+    Serial.println(ESP.getFreeHeap());
     GPIO_blink(WiFi.softAPgetStationNum() + 1, 100);
+    digitalWrite(ADMIN_LED, WiFi.softAPgetStationNum() > 0 ? 1 : 0);
   });
 }

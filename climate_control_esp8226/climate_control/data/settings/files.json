@@ -1,31 +1,214 @@
-[  {
-  "name": "settings",
-  "size": 0,
-  "type": "dir",
-  "children": [{
-    "name": "script.js",
-    "size": 7521,
-    "type": "file"
-  }]
-},
-  {
-    "name": "index.html",
-    "size": 1836,
-    "type": "file"
-  },
-  {
-    "name": "fan.jpg",
-    "size": 17015,
-    "type": "file"
-  },
-  {
-    "name": "script.js",
-    "size": 7521,
-    "type": "file"
-  },
-  {
-    "name": "style.css",
-    "size": 967,
-    "type": "file"
-  }
-]
+{
+  "total": 2072576,
+  "used": 712704,
+  "files": [
+      {
+          "n": "admin",
+          "s": 0,
+          "t": "d",
+          "c": [
+              {
+                  "n": "alpine@2.8.2.min.js",
+                  "s": 26981,
+                  "t": "f"
+              },
+              {
+                  "n": "fan.jpg",
+                  "s": 12267,
+                  "t": "f"
+              },
+              {
+                  "n": "index.html",
+                  "s": 9477,
+                  "t": "f"
+              },
+              {
+                  "n": "overrides.css",
+                  "s": 986,
+                  "t": "f"
+              },
+              {
+                  "n": "pico.classless.min.css",
+                  "s": 70167,
+                  "t": "f"
+              }
+          ]
+      },
+      {
+          "n": "defaults",
+          "s": 0,
+          "t": "d",
+          "c": [
+              {
+                  "n": "fan.json",
+                  "s": 63,
+                  "t": "f"
+              },
+              {
+                  "n": "reboot.json",
+                  "s": 34,
+                  "t": "f"
+              },
+              {
+                  "n": "telemetry.json",
+                  "s": 94,
+                  "t": "f"
+              },
+              {
+                  "n": "wifi.json",
+                  "s": 65,
+                  "t": "f"
+              }
+          ]
+      },
+      {
+          "n": "settings",
+          "s": 0,
+          "t": "d",
+          "c": [
+              {
+                  "n": "fan.json",
+                  "s": 63,
+                  "t": "f"
+              },
+              {
+                  "n": "files.json",
+                  "s": 466,
+                  "t": "f"
+              },
+              {
+                  "n": "reboot.json",
+                  "s": 34,
+                  "t": "f"
+              },
+              {
+                  "n": "telemetry.json",
+                  "s": 94,
+                  "t": "f"
+              },
+              {
+                  "n": "wifi.json",
+                  "s": 65,
+                  "t": "f"
+              }
+          ]
+      },
+      {
+          "n": "test.html",
+          "s": 10,
+          "t": "f"
+      },
+      {
+          "n": "www",
+          "s": 0,
+          "t": "d",
+          "c": [
+              {
+                  "n": "48h.onoff.bin",
+                  "s": 576,
+                  "t": "f"
+              },
+              {
+                  "n": "48h.onoff.json",
+                  "s": 1153,
+                  "t": "f"
+              },
+              {
+                  "n": "48h.temp.inside.bin",
+                  "s": 576,
+                  "t": "f"
+              },
+              {
+                  "n": "48h.temp.inside.json",
+                  "s": 3329,
+                  "t": "f"
+              },
+              {
+                  "n": "48h.temp.outside.bin",
+                  "s": 576,
+                  "t": "f"
+              },
+              {
+                  "n": "48h.temp.outside.json",
+                  "s": 3271,
+                  "t": "f"
+              },
+              {
+                  "n": "7d.onoff.bin",
+                  "s": 672,
+                  "t": "f"
+              },
+              {
+                  "n": "7d.onoff.json",
+                  "s": 1345,
+                  "t": "f"
+              },
+              {
+                  "n": "7d.temp.inside.bin",
+                  "s": 672,
+                  "t": "f"
+              },
+              {
+                  "n": "7d.temp.inside.json",
+                  "s": 3893,
+                  "t": "f"
+              },
+              {
+                  "n": "7d.temp.outside.bin",
+                  "s": 672,
+                  "t": "f"
+              },
+              {
+                  "n": "7d.temp.outside.json",
+                  "s": 3732,
+                  "t": "f"
+              },
+              {
+                  "n": "chart-4.4.2.js",
+                  "s": 205488,
+                  "t": "f"
+              },
+              {
+                  "n": "chart-adapter-date-fns.js",
+                  "s": 50650,
+                  "t": "f"
+              },
+              {
+                  "n": "fan.jpg",
+                  "s": 12267,
+                  "t": "f"
+              },
+              {
+                  "n": "favicon.ico",
+                  "s": 15406,
+                  "t": "f"
+              },
+              {
+                  "n": "generate.js",
+                  "s": 2483,
+                  "t": "f"
+              },
+              {
+                  "n": "index.html",
+                  "s": 1322,
+                  "t": "f"
+              },
+              {
+                  "n": "script48h.js",
+                  "s": 2546,
+                  "t": "f"
+              },
+              {
+                  "n": "script7d.js",
+                  "s": 2557,
+                  "t": "f"
+              },
+              {
+                  "n": "style.css",
+                  "s": 905,
+                  "t": "f"
+              }
+          ]
+      }
+  ]
+}

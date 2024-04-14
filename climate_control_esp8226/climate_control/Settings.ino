@@ -1,10 +1,29 @@
 const int t48h_n = 12*48;
+short setting_temp_inside;
+short setting_temp_outside;
+byte setting_onoff;
 short setting_48h_temp[2][t48h_n]; // 0 = inside / 1 = outside
 byte setting_48h_onoff[t48h_n];
 
 const int t7d_n = 4*24*7;
 short setting_7d_temp[2][t48h_n]; // 0 = inside / 1 = outside
 byte setting_7d_onoff[t7d_n];
+
+String setting_wifi_ssid = "";
+String setting_wifi_password = "";
+boolean setting_wifi_hidden = false;
+boolean setting_fan_enabled = false;
+int setting_fan_cold = 0;
+int setting_fan_hot = 0;
+int setting_fan_buffer = 0;
+boolean setting_server_ota = false;
+int setting_telemetry_frequency = 0;
+String setting_telemetry_url = "";
+String setting_telemetry_bucket = "";
+String setting_telemetry_org = "";
+String setting_telemetry_token = "";
+String setting_telemetry_ssid = "";
+String setting_telemetry_password = "";
 
 void Settings_init() {
   // Initialize the buffers 
@@ -21,16 +40,16 @@ void Settings_init() {
   // Initialize the settings
   Settings_load("wifi.json");
   Settings_load("fan.json");
+  Settings_load("telemetry.json");
+  Serial.print("The SSID is ");
+  Serial.println(setting_wifi_ssid);
+  Serial.print("Telemetry URL is ");
+  Serial.println(setting_telemetry_url);
+  Serial.print("Telemetry frequency is ");
+  Serial.println(setting_telemetry_frequency);
+  Serial.print("Fan cold is ");
+  Serial.println(setting_fan_cold);
 }
-
-String setting_wifi_ssid = "";
-String setting_wifi_password = "";
-boolean setting_wifi_hidden = false;
-boolean setting_fan_enabled = false;
-int setting_fan_cold = 0;
-int setting_fan_hot = 0;
-int setting_fan_buffer = 0;
-boolean setting_server_ota = false;
 
 void Settings_load(const char* file) {
     char settingsFile[80];
@@ -49,8 +68,15 @@ void Settings_load(const char* file) {
       setting_wifi_password = setting["password"] | "";
       setting_wifi_hidden = setting["hidden"] | false;
     }
-    Serial.print("The SSID is");
-    Serial.println(setting_wifi_ssid);
+    if (strcmp(file, "telemetry.json") == 0) {
+      setting_telemetry_frequency = setting["frequency"] | 0;
+      setting_telemetry_url = setting["url"] | "";
+      setting_telemetry_bucket = setting["bucket"] | "";
+      setting_telemetry_org = setting["org"] | "";
+      setting_telemetry_token = setting["token"] | "";
+      setting_telemetry_ssid = setting["ssid"] | "";
+      setting_telemetry_password = setting["password"] | "";
+    }
 }
 
 bool Settings_save(JsonObjectConst input, const char* file) {

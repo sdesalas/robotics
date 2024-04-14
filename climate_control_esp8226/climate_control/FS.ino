@@ -8,25 +8,21 @@ void FS_init() {
   }
 
   Serial.println("LittleFS mounted successfully.");
-  FS_info();
-  Serial.println("Listing directory: /");
-  FS_listDirectory("/");
-}
-
-void FS_info() {
-  FSInfo fs_info;
-  LittleFS.info(fs_info);
+  FSInfo info;
+  LittleFS.info(info);
   Serial.print("Total Bytes: ");
-  Serial.println(fs_info.totalBytes);
+  Serial.println(info.totalBytes);
   Serial.print("Used Bytes: ");
-  Serial.println(fs_info.usedBytes);
+  Serial.println(info.usedBytes);
+  Serial.println("Listing directory: /");
+  FS_list("/");
 }
 
-void FS_listDirectory(const char * dirname) {
-  FS_listDirectory(dirname, MAX_DEPTH, 0);
+void FS_list(const char * dirname) {
+  FS_list(dirname, MAX_DEPTH, 0);
 }
 
-void FS_listDirectory(const char * dirname, int depth, int level) {
+void FS_list(const char * dirname, int depth, int level) {
   Dir root = LittleFS.openDir(dirname);
 
   while (root.next()) {
@@ -41,12 +37,43 @@ void FS_listDirectory(const char * dirname, int depth, int level) {
     if (root.isDirectory()) {
       Serial.println("  | (dir)");
       if (level <= depth) {
-        FS_listDirectory(root.fileName().c_str(), depth, depth+1);
+        FS_list(root.fileName().c_str(), depth, depth+1);
       }
     } else {
       Serial.println("  | (file)");  
     }
   }
+}
+
+JsonDocument FS_infoJson() {
+  FSInfo info;
+  LittleFS.info(info);
+  JsonDocument doc;
+  JsonObject root = doc.to<JsonObject>();
+  root["total"] = info.totalBytes;
+  root["used"] = info.usedBytes;
+  root["files"] = FS_listJson("/", MAX_DEPTH, 0);
+  return doc;
+}
+
+JsonDocument FS_listJson(const char * dirname, int depth, int level) {
+  JsonDocument doc;
+  JsonArray arr = doc.to<JsonArray>();
+  Dir root = LittleFS.openDir(dirname);
+  while (root.next()) {
+    JsonDocument item;
+    JsonObject obj = item.to<JsonObject>();
+    File file = root.openFile("r");
+    obj["n"] = root.fileName();
+    obj["s"] = file.size();
+    obj["t"] = root.isDirectory() ? "d" : "f";
+    file.close();
+    if (root.isDirectory() && level <= depth) {
+        obj["c"] = FS_listJson(root.fileName().c_str(), depth, depth+1);
+    }
+    arr.add(item);
+  }
+  return doc;
 }
 
 JsonDocument FS_readJson(const char * path) {

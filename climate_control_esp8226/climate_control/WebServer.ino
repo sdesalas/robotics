@@ -81,10 +81,39 @@ void WebServer_init()
     request->send(200);
   }));
 
-  server.on("/settings/reboot.json", HTTP_POST, [](AsyncWebServerRequest *request){
-    Serial.println("POST /settings/reboot.json");
+  server.addHandler(new AsyncCallbackJsonWebHandler("/settings/telemetry.json", [](AsyncWebServerRequest *request, JsonVariant &json) {
+    Serial.println("POST /settings/telemetry.json");
+    Settings_save(json.as<JsonObject>(), "telemetry.json");
+    Settings_load("telemetry.json");
+    Telemetry_init();
     GPIO_blink(2, 10);
     request->send(200);
+  }));
+
+  server.addHandler(new AsyncCallbackJsonWebHandler("/settings/reboot.json", [](AsyncWebServerRequest *request, JsonVariant &json) {
+    Serial.println("POST /settings/reboot.json");
+    Settings_save(json.as<JsonObject>(), "reboot.json");
+    Settings_load("reboot.json");
+    GPIO_blink(2, 10);
+    request->send(200);
+  }));
+
+  server.on("/api/reboot", HTTP_POST, [](AsyncWebServerRequest *request){
+    Serial.println("POST /api/reboot");
+    // TODO: Check auth header vs setting
+    GPIO_blink(10, 10);
+    request->send(200);
+    delay(500);
+    ESP.restart();
+  });
+
+  server.on("/settings/files.json", HTTP_GET, [](AsyncWebServerRequest *request){
+    Serial.println("GET /settings/files.json");
+    GPIO_blink(2, 10);
+    AsyncResponseStream *response = request->beginResponseStream("application/json");
+    JsonDocument doc = FS_infoJson();
+    serializeJson(doc, *response);
+    request->send(response);
   });
 
   server

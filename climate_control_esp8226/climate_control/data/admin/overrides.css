@@ -3,6 +3,10 @@
   --pico-nav-element-spacing-vertical: 8pt;
   --pico-form-element-background-color: #fefff6 !important;
 }
+progress {
+  height: 1.5em;
+  border-radius: 0.7em;
+}
 button {
   --pico-form-element-spacing-vertical: 6pt;   
 }
@@ -19,7 +23,7 @@ nav ul li {
   margin-right: 3px;
 }
 nav ul li.active {
-  background-color: #d9e3e9;
+  background-color: var(--pico-progress-background-color);
   border-bottom: 2px solid var(--pico-primary-background);
   color: black;
 }

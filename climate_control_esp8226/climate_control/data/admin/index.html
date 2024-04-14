@@ -20,7 +20,7 @@
   </head>
   <body>
     <main>
-      <p><img src="fan.jpg" style="display: block; width: 120px;"/></p>
+      <p><img src="esp.jpg" style="display: block; width: 180px;"/></p>
       <nav role="tab-control" x-data="nav()" x-init="show(location.hash || 'fan')">
         <ul>
           <li :class="{ 'active': tab === 'fan' }" @click="show('fan')">Fan</li>
@@ -98,34 +98,38 @@
         <fieldset>
           <legend>Frequency:</legend>
           <label>
-            <input type="radio" name="frequency" value="0" x-model="data.frequency"/>
+            <input type="radio" name="frequency" value="0" x-model.number="data.frequency"/>
             Disabled
           </label>
           <label>
-            <input type="radio" name="frequency" value="5" x-model="data.frequency"/>
+            <input type="radio" name="frequency" value="1" x-model.number="data.frequency"/>
+            1 minute
+          </label>
+          <label>
+            <input type="radio" name="frequency" value="5" x-model.number="data.frequency"/>
             5 minutes
           </label>
           <label>
-            <input type="radio" name="frequency" value="15" x-model="data.frequency"/>
+            <input type="radio" name="frequency" value="15" x-model.number="data.frequency"/>
             15 minutes
-          </label>
-          <label>
-            <input type="radio" name="frequency" value="60" x-model="data.frequency"/>
-            60 minutes
           </label>
         </fieldset>
         <fieldset>
           <label>
-            InfluxDb Url (http only, no https)
-            <input name="url" placeholder="http://influxdb.domain.com:8086/bucket" x-model="data.url"/>
+            InfluxDb Url (Use: InfluxDB UI -> Load Data -> Client Libraries)
+            <input name="url" placeholder="https://eu-central-1-1.aws.cloud2.influxdata.com" x-model="data.url"/>
           </label>
           <label>
-            Org
+            InfluxDb Bucket (Use: InfluxDB UI -> Data -> Buckets)
+            <input name="bucket" placeholder="metrics" x-model="data.bucket"/>
+          </label>
+          <label>
+            Org (Use: InfluxDB UI -> User -> About -> Common Ids )
             <input name="org" placeholder="myorg" x-model="data.org"/>
           </label>
           <label>
-            API Key
-            <input name="apikey" placeholder="influxapikey" x-model="data.apikey"/>
+            API Token (Use: InfluxDB UI -> Data -> Tokens)
+            <input name="token" placeholder="influxapitoken" x-model="data.token"/>
           </label>
         </fieldset>
         <fieldset>
@@ -149,12 +153,16 @@
       </form>
       <!-- FILES -->
       <form id="files" x-data="files()" @data="data = $event.detail">
+        <div style="display: flex">
+          <progress x-bind:value="Math.round(data.used/data.total*100||0)" max="100"></progress>
+          <div><span x-text="Math.round(data.used/1024) + '/' + Math.round(data.total/1024)" style="padding-left: 1em"></span>Kb</div>
+        </div>
         <table class="striped">
           <tbody>
-            <template x-for="f in data" :key="f">
+            <template x-for="f in data.files || []" :key="f">
               <tr>
-                <th scope="row" x-text="f.name"></th>
-                <td x-text="f.size"></td>
+                <th scope="row" x-text="f.n"></th>
+                <td x-text="f.s"></td>
               </tr>
             </template>
           </tbody>
@@ -193,39 +201,49 @@
           async show(tab) {
             if (!tab) return;
             let delay = 200;
+            // Hash-based router
             if (tab.indexOf('#') === 0) {
               tab = tab.substring(1);
               delay = 0;
             }
             location.hash = tab;
+            this.hideForms(tab);
+            this.loadData(tab);
+            this.showForm(tab);
+            this.tab = tab;
+          },
+          async hideForms(tab) {
             for (const form of [...document.querySelectorAll('form')]) {
               if (form.id !== tab) {
                 form.style.display = 'none';
               }
             }
+          },
+          async loadData(tab) {
             const data = await fetch(`../settings/${tab}.json`).then(r => r.json());
             console.log('fetch()', tab, data);
             const e = new CustomEvent('data', { detail: data });
             document.getElementById(tab).dispatchEvent(e);
+          },
+          async showForm(tab) {
             for (const form of [...document.querySelectorAll('form')]) {
               if (form.id === tab) {
                 form.style.display = 'block';
               }
             }
-            this.tab = tab;
-          } 
+          }
         }
       }
       function files(f) {
         return {
-          data: []
+          data: {}
         }
       }
       function settings(file) {
         const settings = {
           fan: ['enabled', 'cold', 'hot', 'buffer'],
           wifi: ['ssid', 'password', 'hidden'],
-          telemetry: ['frequency', 'url', 'org', 'apikey', 'ssid', 'password'],
+          telemetry: ['frequency', 'url', 'bucket', 'org', 'token', 'ssid', 'password'],
           boot: ['ota', 'key']
         }
         return {
