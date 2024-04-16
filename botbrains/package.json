@@ -12,7 +12,7 @@
   "dependencies": {
     "audio-generator": "^2.1.2",
     "audio-speaker": "^1.5.0",
-    "botbrains": "^0.5.14",
+    "botbrains": "^0.5.20",
     "johnny-five": "^0.14.3",
     "say": "^0.14.0"
   }

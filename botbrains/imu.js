@@ -33,13 +33,13 @@ board.on('ready', () => {
                 z = sensor.accelerometer.z,
                 acceleration = sensor.accelerometer.acceleration;
 
-            // process.stdout.write('\033c');
-            // console.log("Accelerometer");
-            // console.log("  x            : ", x);
-            // console.log("  y            : ", y);
-            // console.log("  z            : ", z);
-            // console.log("  acceleration : ", acceleration);
-            // console.log("--------------------------------------");
+            process.stdout.write('\033c');
+            console.log("Accelerometer");
+            console.log("  x            : ", x);
+            console.log("  y            : ", y);
+            console.log("  z            : ", z);
+            console.log("  acceleration : ", acceleration);
+            console.log("--------------------------------------");
 
             if (Math.abs(x) > 500) direction = 'x';
             else if (Math.abs(y) > 500) direction = 'y';
@@ -54,21 +54,21 @@ board.on('ready', () => {
 
     });
     
-    const output_C1 = network.output('C1');
-    const output_D1 = network.output('D1');
-    const output_E1 = network.output('E1');
-    const output_F1 = network.output('F1');
-    const output_G1 = network.output('G1');
-    const output_A1 = network.output('A1');
-    const output_B1 = network.output('B1');
+    // const output_C1 = network.output('C1');
+    // const output_D1 = network.output('D1');
+    // const output_E1 = network.output('E1');
+    // const output_F1 = network.output('F1');
+    // const output_G1 = network.output('G1');
+    // const output_A1 = network.output('A1');
+    // const output_B1 = network.output('B1');
 
-    output_C1.on('data', duration => sound.play(1055, duration * 1000));
-    output_D1.on('data', duration => sound.play(940, duration * 1000));
-    output_E1.on('data', duration => sound.play(837, duration * 1000));
-    output_F1.on('data', duration => sound.play(790, duration * 1000));
-    output_G1.on('data', duration => sound.play(705, duration * 1000));
-    output_A1.on('data', duration => sound.play(627, duration * 1000));
-    output_B1.on('data', duration => sound.play(558, duration * 1000));
+    // output_C1.on('data', duration => sound.play(1055, duration * 1000));
+    // output_D1.on('data', duration => sound.play(940, duration * 1000));
+    // output_E1.on('data', duration => sound.play(837, duration * 1000));
+    // output_F1.on('data', duration => sound.play(790, duration * 1000));
+    // output_G1.on('data', duration => sound.play(705, duration * 1000));
+    // output_A1.on('data', duration => sound.play(627, duration * 1000));
+    // output_B1.on('data', duration => sound.play(558, duration * 1000));
 
     // output_C1.on('data', () => (direction === 'x') ? moreOf() : lessOf());
     // output_D1.on('data', () => (direction === 'x') ? moreOf() : lessOf());
