@@ -6,61 +6,38 @@ AsyncWebServer server(80);
 
 void WebServer_init()
 {
-  server.on("/api/48h.temp.inside.bin", HTTP_GET, [](AsyncWebServerRequest *request){
-    Serial.println("GET /api/48h.temp.inside.bin");
-    AsyncResponseStream *response = request->beginResponseStream("application/octet-stream");
-    for(int i = 0; i < t48h_n; i++) {
-      response->write(highByte(setting_48h_temp[0][i]));
-      response->write(lowByte(setting_48h_temp[0][i]));
+  server.on("/metrics/history.csv", HTTP_GET, [](AsyncWebServerRequest *request){
+    Serial.println("GET /metrics/csv");
+    AsyncResponseStream *response = request->beginResponseStream("text/csv");
+    // Stream all the history files backwards from oldest to newest
+    for(int i = METRICS_FILE_COUNT - 1; i >= 0; i--) {
+      String path = METRICS_FILE_FORMAT;
+      path.replace("#", String(i));
+      Serial.print("Reading: ");
+      Serial.println(path);
+      File file = LittleFS.open(path.c_str(), "r");
+      if (file) {
+        char c;
+        while (file.available()) {
+          c = file.read();
+          response->write(c);
+        }
+        // Add EOL per file; 
+        if (c != '\n') response->write('\n');
+        file.close();
+      }
     }
     request->send(response);
   });
 
-  server.on("/api/48h.temp.outside.bin", HTTP_GET, [](AsyncWebServerRequest *request){
-    Serial.println("GET /api/48h.temp.outside.bin");
-    AsyncResponseStream *response = request->beginResponseStream("application/octet-stream");
-    for(int i = 0; i < t48h_n; i++) {
-      response->write(highByte(setting_48h_temp[1][i]));
-      response->write(lowByte(setting_48h_temp[1][i]));
-    }
-    request->send(response);
-  });
-
-  server.on("/api/48h.onoff.bin", HTTP_GET, [](AsyncWebServerRequest *request){
-    Serial.println("GET /api/48h.onoff.bin");
-    AsyncResponseStream *response = request->beginResponseStream("application/octet-stream");
-    for(int i = 0; i < t48h_n; i++) {
-      response->write(setting_48h_onoff[i]);
-    }
-    request->send(response);
-  });
-
-  server.on("/api/48h.temp.inside.json", HTTP_GET, [](AsyncWebServerRequest *request){
-    Serial.println("GET /api/48h.temp.inside.json");
+  server.on("/metrics/current.json", HTTP_GET, [](AsyncWebServerRequest *request){
+    Serial.println("GET /metrics/current.json");
     AsyncJsonResponse * response = new AsyncJsonResponse();
     JsonObject root = response->getRoot();
-    JsonArray inside = root.createNestedArray("inside");
-    for(int i = 0; i < t48h_n; i++) inside.add(setting_48h_temp[0][i]);
-    response->setLength();
-    request->send(response);
-  });
-
-  server.on("/api/48h.temp.outside.json", HTTP_GET, [](AsyncWebServerRequest *request){
-    Serial.println("GET /api/48h.temp.outside.json");
-    AsyncJsonResponse * response = new AsyncJsonResponse();
-    JsonObject root = response->getRoot();
-    JsonArray outside = root.createNestedArray("outside");
-    for(int i = 0; i < t48h_n; i++) outside.add(setting_48h_temp[1][i]);
-    response->setLength();
-    request->send(response);
-  });
-
-  server.on("/api/48h.onoff.json", HTTP_GET, [](AsyncWebServerRequest *request){
-    Serial.println("GET /api/48h.onoff.json");
-    AsyncJsonResponse * response = new AsyncJsonResponse();
-    JsonObject root = response->getRoot();
-    JsonArray onoff = root.createNestedArray("onoff");
-    for(int i = 0; i < t48h_n; i++) onoff.add(setting_48h_onoff[i]);
+    root["inside"] = metric.inside;
+    root["outside"] = metric.outside;
+    root["fan"] = metric.fan;
+    root["count"] = metric.count;
     response->setLength();
     request->send(response);
   });

@@ -27,6 +27,6 @@ void Wifi_init() {
     Serial.print("ESP.getFreeHeap(): ");
     Serial.println(ESP.getFreeHeap());
     GPIO_blink(WiFi.softAPgetStationNum() + 1, 100);
-    digitalWrite(ADMIN_LED, WiFi.softAPgetStationNum() > 0 ? 1 : 0);
+    digitalWrite(GPIO_RED_LED, WiFi.softAPgetStationNum() > 0 ? 1 : 0);
   });
 }

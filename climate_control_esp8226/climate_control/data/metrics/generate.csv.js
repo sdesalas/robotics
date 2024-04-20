@@ -16,7 +16,7 @@ const onoff = tinside.map((t, i) => {
   return 0;
 });
 
-const filename = './metrics.000.csv';
+const filename = './history.0.csv';
 
 if (fs.existsSync(filename)) fs.rmSync(filename)
 

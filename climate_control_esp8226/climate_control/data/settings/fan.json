@@ -2,5 +2,6 @@
   "enabled": true,
   "cold": 20,
   "hot": 25,
+  "sensorswap": false,
   "buffer": 2
 }

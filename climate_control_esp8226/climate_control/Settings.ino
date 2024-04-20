@@ -1,42 +1,5 @@
-const int t48h_n = 12*48;
-short setting_temp_inside;
-short setting_temp_outside;
-byte setting_onoff;
-short setting_48h_temp[2][t48h_n]; // 0 = inside / 1 = outside
-byte setting_48h_onoff[t48h_n];
-
-const int t7d_n = 4*24*7;
-short setting_7d_temp[2][t48h_n]; // 0 = inside / 1 = outside
-byte setting_7d_onoff[t7d_n];
-
-String setting_wifi_ssid = "";
-String setting_wifi_password = "";
-boolean setting_wifi_hidden = false;
-boolean setting_fan_enabled = false;
-int setting_fan_cold = 0;
-int setting_fan_hot = 0;
-int setting_fan_buffer = 0;
-boolean setting_server_ota = false;
-int setting_telemetry_frequency = 0;
-String setting_telemetry_url = "";
-String setting_telemetry_bucket = "";
-String setting_telemetry_org = "";
-String setting_telemetry_token = "";
-String setting_telemetry_ssid = "";
-String setting_telemetry_password = "";
 
 void Settings_init() {
-  // Initialize the buffers 
-  for(int i = 0; i < t48h_n; i++) {
-    setting_48h_temp[0][i] = 2000;
-    setting_48h_temp[1][i] = 1500;
-    setting_48h_onoff[i] = 0;
-  }
-  for(int i = 0; i < t7d_n; i++) {
-    setting_7d_temp[0][i] = 2000;
-    setting_7d_temp[1][i] = 1500;
-    setting_7d_onoff[i] = 0;
-  }
   // Initialize the settings
   Settings_load("wifi.json");
   Settings_load("fan.json");
@@ -62,6 +25,7 @@ void Settings_load(const char* file) {
       setting_fan_cold = setting["cold"] | 0;
       setting_fan_hot = setting["hot"] | 0;
       setting_fan_buffer = setting["buffer"] | 0;
+      setting_fan_sensorswap = setting["sensorswap"] | false;
     }
     if (strcmp(file, "wifi.json") == 0) {
       setting_wifi_ssid = setting["ssid"] | "";
@@ -76,6 +40,9 @@ void Settings_load(const char* file) {
       setting_telemetry_token = setting["token"] | "";
       setting_telemetry_ssid = setting["ssid"] | "";
       setting_telemetry_password = setting["password"] | "";
+    }
+    if (strcmp(file, "reboot.json") == 0) {
+      setting_reboot_ota = setting["ota"] | false;
     }
 }
 

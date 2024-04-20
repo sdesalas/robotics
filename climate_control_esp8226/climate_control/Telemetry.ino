@@ -1,6 +1,6 @@
 #include <InfluxDbClient.h>
 
-#define TELEMETRY_MAX_WAIT_CONN 10000
+#define TELEMETRY_CONN_MAX_WAIT (10*SECOND)
 #define TELEMETRY_BATCH_SIZE 3
 #define TELEMETRY_BUFFER_SIZE 6
 
@@ -19,7 +19,7 @@ void Telemetry_init() {
     influxDbClient->setInsecure();
     influxDbClient->setWriteOptions(WriteOptions().batchSize(TELEMETRY_BATCH_SIZE).bufferSize(TELEMETRY_BUFFER_SIZE));
     sendTelemetry.detach();
-    sendTelemetry.attach_ms_scheduled(setting_telemetry_frequency * 60000, Telemetry_check);
+    sendTelemetry.attach_ms_scheduled(setting_telemetry_frequency * MINUTE, Telemetry_check);
   }
 }
 
@@ -45,7 +45,7 @@ void Telemetry_check() {
       Serial.println("Sending telemetry...");
       boolean success = Telemetry_send();
       Serial.println(success ? "Success!" : "Unable to send!");
-      GPIO_blink(ADMIN_LED, 10, 100);
+      GPIO_blink(GPIO_RED_LED, 10, 100);
       Serial.println("Disconnecting..");
       WiFi.disconnect(true);
     }
@@ -62,14 +62,14 @@ boolean Telemetry_connect() {
   bool blink = 0;
   while (WiFi.status() != WL_CONNECTED) {
     blink = !blink;
-    digitalWrite(ADMIN_LED, blink);
+    digitalWrite(GPIO_RED_LED, blink);
     delay(200); Serial.print(".");
-    if (millis() - start > TELEMETRY_MAX_WAIT_CONN) {
-      Serial.printf("Unable to connect over %d seconds.", TELEMETRY_MAX_WAIT_CONN);
+    if (millis() - start > TELEMETRY_CONN_MAX_WAIT) {
+      Serial.printf("Unable to connect over %d seconds.", TELEMETRY_CONN_MAX_WAIT);
       break;
     }
   }
-  digitalWrite(ADMIN_LED, 0);
+  digitalWrite(GPIO_RED_LED, 0);
   Serial.println();
   if (WiFi.status() == WL_CONNECTED) {
     Serial.print("Connected! IP address is: ");
