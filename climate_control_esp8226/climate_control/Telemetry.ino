@@ -1,8 +1,9 @@
 #include <InfluxDbClient.h>
 
 #define TELEMETRY_CONN_MAX_WAIT (10*SECOND)
-#define TELEMETRY_BATCH_SIZE 3
-#define TELEMETRY_BUFFER_SIZE 6
+#define TELEMETRY_BATCH_SIZE 4
+#define TELEMETRY_BUFFER_SIZE 8
+#define TELEMETRY_MEASUREMENT "climate_control"
 
 InfluxDBClient *influxDbClient = NULL;
 Ticker sendTelemetry;
@@ -80,17 +81,21 @@ boolean Telemetry_connect() {
 }
 
 boolean Telemetry_send() {
-  Point fan_outside("temperature");
-  fan_outside.addTag("source", "fan_outside");
-  fan_outside.addField("value", 12.0f + random(0, 3));
-  influxDbClient->writePoint(fan_outside);
-  Point fan_inside("temperature");
-  fan_inside.addTag("source", "fan_inside");
-  fan_inside.addField("value", 21.0f + random(0, 1));
-  influxDbClient->writePoint(fan_inside);
-  Point fan_on("temperature");
-  fan_on.addTag("source", "fan_on");
-  fan_on.addField("value", 0.0f + random(0, 1));
-  influxDbClient->writePoint(fan_on);
+  Point p1(TELEMETRY_MEASUREMENT);
+  p1.addTag("source", "metric.inside");
+  p1.addField("value", metric.inside);
+  influxDbClient->writePoint(p1);
+  Point p2(TELEMETRY_MEASUREMENT);
+  p2.addTag("source", "metric.outside");
+  p2.addField("value", metric.outside);
+  influxDbClient->writePoint(p2);
+  Point p3(TELEMETRY_MEASUREMENT);
+  p3.addTag("source", "metric.fan");
+  p3.addField("value", metric.fan);
+  influxDbClient->writePoint(p3);
+  Point p4(TELEMETRY_MEASUREMENT);
+  p4.addTag("source", "metric.count");
+  p4.addField("value", metric.count);
+  influxDbClient->writePoint(p4);
   return influxDbClient->flushBuffer();
 }

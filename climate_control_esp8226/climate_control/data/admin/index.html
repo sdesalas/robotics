@@ -34,11 +34,11 @@
       <form id="fan" x-data="settings($el.id)" @data="data = $event.detail">
         <fieldset>
           <legend>Fan:</legend>
-        <label>
-          <input type="checkbox" name="enabled" checked x-model="data.enabled"/>
-          Enabled
-        </label>
-      </fieldset>
+          <label>
+            <input type="checkbox" name="enabled" checked x-model="data.enabled"/>
+            Enabled
+          </label>
+        </fieldset>
         <fieldset>
           <legend>Indoor temperature:</legend>
           <label>
@@ -53,6 +53,13 @@
             Buffer (&deg;C)
             <input name="buffer" x-model.number="data.buffer"/>
           </label>
+          <fieldset>
+            <legend data-tooltip="Swap the inside and outside sensors.">Swap Sensors:</legend>
+            <label>
+              <input type="checkbox" name="swapsensors" checked x-model="data.swapsensors"/>
+              Enabled
+            </label>
+          </fieldset>
         </fieldset>
         <button @click.prevent="save($event.target)">Save</button>
         <br/>
@@ -241,7 +248,7 @@
       }
       function settings(file) {
         const settings = {
-          fan: ['enabled', 'cold', 'hot', 'buffer'],
+          fan: ['enabled', 'cold', 'hot', 'buffer', 'swapsensors'],
           wifi: ['ssid', 'password', 'hidden'],
           telemetry: ['frequency', 'url', 'bucket', 'org', 'token', 'ssid', 'password'],
           boot: ['ota', 'key']

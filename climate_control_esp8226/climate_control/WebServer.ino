@@ -9,8 +9,9 @@ void WebServer_init()
   server.on("/metrics/history.csv", HTTP_GET, [](AsyncWebServerRequest *request){
     Serial.println("GET /metrics/csv");
     AsyncResponseStream *response = request->beginResponseStream("text/csv");
-    // Stream all the history files backwards from oldest to newest
-    for(int i = METRICS_FILE_COUNT - 1; i >= 0; i--) {
+    // Stream 3x history files backwards from oldest to newest
+    // 48 hours of data minimum
+    for(int i = 3; i >= 0; i--) {
       String path = METRICS_FILE_FORMAT;
       path.replace("#", String(i));
       Serial.print("Reading: ");

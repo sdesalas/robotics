@@ -3,6 +3,10 @@
   --pico-nav-element-spacing-vertical: 8pt;
   --pico-form-element-background-color: #fefff6 !important;
 }
+body {
+  max-width: 600px;
+  margin: 0 auto;
+}
 progress {
   height: 1.5em;
   border-radius: 0.7em;

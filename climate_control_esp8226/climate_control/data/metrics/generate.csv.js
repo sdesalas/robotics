@@ -2,7 +2,7 @@ const fs = require('fs');
 
 function generateReadings(baseTemp, readings, units, varianceTemp, cycles) {
   const length = readings*units;
-  return Array(length).fill(0).map((t,i) => Math.round(baseTemp * 10 + Math.sin(i/(length/cycles/(Math.PI*2))) * varianceTemp * 10));
+  return Array(length).fill(0).map((t,i) => Math.round(baseTemp * 100 + Math.sin(i/(length/cycles/(Math.PI*2))) * varianceTemp * 100) / 100);
 };
 
 

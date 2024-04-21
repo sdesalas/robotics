@@ -25,7 +25,7 @@ void Settings_load(const char* file) {
       setting_fan_cold = setting["cold"] | 0;
       setting_fan_hot = setting["hot"] | 0;
       setting_fan_buffer = setting["buffer"] | 0;
-      setting_fan_sensorswap = setting["sensorswap"] | false;
+      setting_fan_swapsensors = setting["swapsensors"] | false;
     }
     if (strcmp(file, "wifi.json") == 0) {
       setting_wifi_ssid = setting["ssid"] | "";

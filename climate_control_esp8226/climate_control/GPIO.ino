@@ -55,8 +55,8 @@ void GPIO_collect(struct Metric& metric) {
   gpio_sensors.requestTemperatures();
 
   // Collect temperature from each sensor
-  int outsideSensor = setting_fan_sensorswap ? 1 : 0;
-  int insideSensor = setting_fan_sensorswap ? 0 : 1;
+  int outsideSensor = setting_fan_swapsensors ? 1 : 0;
+  int insideSensor = setting_fan_swapsensors ? 0 : 1;
   for (int i = 0;  i < gpio_device_count;  i++) {
     if (i == outsideSensor) {
       Serial.print("Out:");

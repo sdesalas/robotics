@@ -9,14 +9,14 @@
 #define SECOND 1000
 #define MINUTE (60 * 1000)
 
-struct Metric { short inside; short outside; byte fan; short count; };
+struct Metric { float inside; float outside; byte fan; short count; };
 
 // "fan" options
 boolean setting_fan_enabled = false;
 int setting_fan_cold = 0;
 int setting_fan_hot = 0;
 int setting_fan_buffer = 0;
-boolean setting_fan_sensorswap = false;
+boolean setting_fan_swapsensors = false;
 // "wifi" options
 String setting_wifi_ssid = "";
 String setting_wifi_password = "";
