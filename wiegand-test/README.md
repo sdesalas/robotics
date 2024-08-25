@@ -2,8 +2,8 @@
 
 Various tests for commercially available and cost-effective Wiegand ID/IC card readers.
 
-- 
-- 
+- [ID/IC Card Reader With Keypad](https://www.aliexpress.com/item/1005006242176757.html)
+- [ID Card Reader (No Keypad)](https://www.aliexpress.com/item/1005005890917861.html)
 
 The idea is to be able to run 2 wiegand readers (one with keypad) connected to a central access control ESP8266 node that can be managed via HTTP/Browser over WiFi.
 
