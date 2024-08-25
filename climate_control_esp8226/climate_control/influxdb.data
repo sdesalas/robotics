@@ -1,0 +1,11 @@
+# curl -i -H "Authorization: Token 9V7KrkyBv46TQWu6O5PIExKZfXBesqnutQ1HWVMJ80ZUUGQMT4u0VG98BtVlnv6bOmz4HbQ-Y48xdLu_feOuEQ==" -XPOST "https://influxdb.crafty.monster/write?db=metrics" --data-binary @influxdb.data
+temperature,source=fan_external value=22.9 1713042324177000000
+temperature,source=fan_external value=23.2 1713042424177000000
+temperature,source=fan_internal value=22.7 1713042524177000000
+temperature,source=fan_internal value=22.1 1713042624177000000
+
+#Influxdb Cloud
+url: https://eu-central-1-1.aws.cloud2.influxdata.com
+bucket: metrics
+org: 868b05125de27d7e
+token EKBmz8zlI82sWbYojdns-C7Yyaa9CTHnyA_2NjpWjaufHoUTD-RXI5RY4wiwxaJZRgtE5b-eiddS03W1wXOaJQ==

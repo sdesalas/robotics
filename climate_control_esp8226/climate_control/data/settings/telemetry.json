@@ -1,9 +1,9 @@
 {
   "frequency": 0,
-  "url": "",
-  "bucket": "",
-  "org": "",
-  "token": "",
-  "ssid": "",
+  "url": "https://eu-central-1-1.aws.cloud2.influxdata.com",
+  "bucket": "metrics",
+  "org": "868b05125de27d7e",
+  "token": "LB0UFRnwdPn6L-qSX5e1b_AV_Vm6WoeLtN_AE1jpRWyEfG_9PYCEgKdVCcu3qro7OiBIZj38rJddmQpE7Q_65Q==",
+  "ssid": "MiFibra-1674",
   "password": ""
 }
