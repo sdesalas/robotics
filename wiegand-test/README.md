@@ -13,6 +13,8 @@ The idea is to be able to run 2 wiegand readers (one with keypad) connected to a
 
 Amazingly enough, after some tests I discovered that you can connect these 12v devices using a 10K Ohm resistor pulling excess voltage to ground. So that the microcontroller only receives 3.7V that its rated for.
 
+```
+
 ----------------------------- 12V ground ------------|
                                                      |
 --- 12V+ (signal) ---|                               |
@@ -31,3 +33,5 @@ Amazingly enough, after some tests I discovered that you can connect these 12v d
         |---------------------                       |
                           |                          |
                           ---------------------------|
+
+```
