@@ -34,4 +34,10 @@ Amazingly enough, after some tests I discovered that you can connect these 12v d
                           |                          |
                           ---------------------------|
 
+
 ```
+
+And the result!
+
+<img width="500" src="img/IMG_20240825_133449.jpg">
+
