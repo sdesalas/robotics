@@ -1,5 +1,5 @@
-#ifndef _WIEGAND_H
-#define _WIEGAND_H
+#ifndef _WIEGAND_MULTI_H_
+#define _WIEGAND_MULTI_H_
 
 #if defined(ARDUINO) && ARDUINO >= 100
 #include "Arduino.h"
@@ -10,26 +10,23 @@
 class WIEGAND {
 
 public:
-	WIEGAND();
-	void begin();
-	void begin(int pinD0, int pinD1);
-	void begin(int pinD0, int pinIntD0, int pinD1, int pinIntD1);
-	bool available();
-	unsigned long getCode();
-	int getWiegandType();
-	
+  WIEGAND();
+  bool available();
+  void ReadD0();
+  void ReadD1();
+  unsigned long getCode();
+  int getWiegandType();
+  
 private:
-	static void ReadD0();
-	static void ReadD1();
-	static bool DoWiegandConversion ();
-	static unsigned long GetCardId (volatile unsigned long *codehigh, volatile unsigned long *codelow, char bitlength);
-	
-	static volatile unsigned long 	_cardTempHigh;
-	static volatile unsigned long 	_cardTemp;
-	static volatile unsigned long 	_lastWiegand;
-	static volatile int				_bitCount;	
-	static int				_wiegandType;
-	static unsigned long	_code;
+  bool DoWiegandConversion ();
+  unsigned long GetCardId (volatile unsigned long *codehigh, volatile unsigned long *codelow, char bitlength);
+  
+  volatile unsigned long  _cardTempHigh;
+  volatile unsigned long  _cardTemp;
+  volatile unsigned long  _lastWiegand;
+  volatile int        _bitCount;  
+  int       _wiegandType;
+  unsigned long _code;
 };
 
 #endif

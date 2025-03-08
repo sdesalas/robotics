@@ -1,42 +1,72 @@
 #include "wiegand.h"
 
-WIEGAND wg;
+// Test with 2 devices connected (card reader + keypad)
 
-int PinD0 = 5; // D1 (GPIO5) GREEN "D0"
-int PinD1 = 4; // D2 (GPIO4) WHITE "D1"
-int LedD0 = 12; // D6 (GPIO12)
-int LedD1 = 13; // D7 (GPIO13)
+WIEGAND cardReader;
+int cardPinD0 = 5; // D1 (GPIO5) GREEN "D0"
+int cardPinD1 = 4; // D2 (GPIO4) WHITE "D1"
+int cardStatusLED = 0; // D3 (GPIO0) STATUS LED
+void ICACHE_RAM_ATTR cardReadD0() {
+  cardReader.ReadD0();
+}
+void ICACHE_RAM_ATTR cardReadD1() {
+  cardReader.ReadD1();
+}
 
-//int PinD0 = 14; // D5 (GPIO14)
-//int PinD1 = 12; // D6 (GPIO12)
+WIEGAND keypadReader;
+int keypadPinD0 = 12; // D6 (GPIO12) GREEN "D0"
+int keypadPinD1 = 13; // D7 (GPIO13) WHITE "D1"
+int keypadStatusLED = 14; // D5 (GPIO14) STATUS LED 
+void ICACHE_RAM_ATTR keypadReadD0() {
+  keypadReader.ReadD0();
+}
+void ICACHE_RAM_ATTR keypadReadD1() {
+  keypadReader.ReadD1();
+}
+
 
 void setup() {
   Serial.begin(115200);
   Serial.println();
-  Serial.println("Starting Wiegand Reader..");
-  pinMode(PinD0, INPUT);
-  pinMode(PinD1, INPUT);
-  pinMode(LedD0, OUTPUT);
-  pinMode(LedD1, OUTPUT);
+
+  Serial.println("Starting Wiegand Card Reader..");
+  pinMode(cardPinD0, INPUT);
+  pinMode(cardPinD1, INPUT);
+  pinMode(cardStatusLED, OUTPUT);
+	attachInterrupt(digitalPinToInterrupt(cardPinD0), cardReadD0, FALLING);
+	attachInterrupt(digitalPinToInterrupt(cardPinD1), cardReadD1, FALLING);
+
+  Serial.println("Starting Wiegand Keypad..");
+  pinMode(keypadPinD0, INPUT);
+  pinMode(keypadPinD1, INPUT);
+  pinMode(keypadStatusLED, OUTPUT);
+	attachInterrupt(digitalPinToInterrupt(keypadPinD0), keypadReadD0, FALLING);
+	attachInterrupt(digitalPinToInterrupt(keypadPinD1), keypadReadD1, FALLING);
   
-  // default Wiegand Pin 2 and Pin 3 see image on README.md
-  // for non UNO board, use wg.begin(pinD0, pinD1) where pinD0 and pinD1 
-  // are the pins connected to D0 and D1 of wiegand reader respectively.
-  wg.begin(5, 4);
   Serial.println("Ready for input..");
 }
 
 void loop() {
-  if(wg.available())
+  if(cardReader.available())
   {
-    Serial.print("Wiegand HEX = ");
-    Serial.print(wg.getCode(),HEX);
+    Serial.print("cardReader WG HEX = ");
+    Serial.print(cardReader.getCode(),HEX);
     Serial.print(", DECIMAL = ");
-    Serial.print(wg.getCode());
+    Serial.print(cardReader.getCode());
     Serial.print(", Type W");
-    Serial.println(wg.getWiegandType());    
+    Serial.println(cardReader.getWiegandType());    
   }
+  if(keypadReader.available())
+  {
+    Serial.print("keypadReader WG HEX = ");
+    Serial.print(keypadReader.getCode(),HEX);
+    Serial.print(", DECIMAL = ");
+    Serial.print(keypadReader.getCode());
+    Serial.print(", Type W");
+    Serial.println(keypadReader.getWiegandType());    
+  }
+  // Status LEDs (=> ON if device connected properly)
   delay(50);
-  digitalWrite(LedD0, digitalRead(PinD0));
-  digitalWrite(LedD1, digitalRead(PinD1));
+  digitalWrite(cardStatusLED, digitalRead(cardPinD0) & digitalRead(cardPinD1));
+  digitalWrite(keypadStatusLED, digitalRead(keypadPinD0) & digitalRead(keypadPinD1));
 }
